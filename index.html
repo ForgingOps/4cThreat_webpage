@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4cThreat | Integrated Airspace Intelligence</title>
+    <style>
+        :root {
+            --safe: #00ff41;    /* Monitoring Green */
+            --warn: #ffcc00;    /* Analysis Yellow */
+            --alert: #ff2a2a;   /* Critical Red */
+            --bg: #1c1c22;      /* Lighter Tactical Slate Grey */
+            --panel: rgba(15, 15, 20, 0.9);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg);
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: var(--safe);
+            cursor: crosshair;
+        }
+
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        /* UI Overlay Wrapper */
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px;
+            box-sizing: border-box;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 20px;
+            background: linear-gradient(to right, rgba(0,0,0,0.9), transparent);
+        }
+
+        /* INCREASED LOGO SIZE */
+        .logo { font-size: 48px; font-weight: 800; letter-spacing: 4px; color: #fff; text-transform: uppercase; }
+        .logo span { color: var(--safe); }
+
+        .status-box {
+            background: rgba(0, 20, 0, 0.6);
+            border: 2px solid var(--safe);
+            color: var(--safe);
+            padding: 10px 40px;
+            font-size: 16px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            min-width: 250px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .status-box.warning { border-color: var(--warn); color: var(--warn); background: rgba(40, 30, 0, 0.6); }
+        .status-box.red-alert { border-color: var(--alert); color: var(--alert); background: rgba(50, 0, 0, 0.9); box-shadow: 0 0 30px rgba(255, 42, 42, 0.5); }
+
+        /* CENTERED HERO TEXT */
+        .hero {
+            position: absolute;
+            top: 15%; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            text-align: center;
+            pointer-events: none;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+        }
+        .hero h1 { margin: 0 0 15px 0; color: #fff; font-size: 36px; text-transform: uppercase; letter-spacing: 2px; font-weight: 900; }
+        .hero p { font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 24px; max-width: 900px; margin-left: auto; margin-right: auto;}
+        
+        /* BOTTOM LEFT CTA BUTTON */
+        .cta-container {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            pointer-events: auto;
+            z-index: 20;
+        }
+
+        .btn {
+            display: inline-block; 
+            padding: 15px 30px; 
+            border: 1px solid var(--safe);
+            color: var(--safe); 
+            text-decoration: none; 
+            font-size: 14px; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            transition: all 0.2s; 
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+        .btn:hover { background: var(--safe); color: #000; box-shadow: 0 0 15px var(--safe); }
+
+        /* HUD Panel */
+        .hud {
+            align-self: flex-end; background: var(--panel); border: 1px solid rgba(255,255,255,0.1);
+            padding: 20px; width: 380px; font-size: 12px;
+            pointer-events: auto;
+        }
+        
+        .hud-section { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .hud-title { color: #888; font-size: 11px; letter-spacing: 2px; margin-bottom: 8px; text-transform: uppercase; display: block;}
+        
+        .telemetry-grid { display: flex; justify-content: space-between; text-align: center; }
+        .t-box { flex: 1; }
+        .t-label { display: block; font-size: 9px; color: #666; letter-spacing: 1px; }
+        .t-val { display: block; font-size: 16px; font-weight: bold; color: #fff; margin-top: 4px; }
+        
+        .alert-text { color: var(--alert) !important; }
+        .warn-text { color: var(--warn) !important; }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="c"></canvas>
+
+    <div class="ui-layer">
+        <header class="header">
+            <div class="logo">4c<span>Threat</span></div>
+            <div id="status" class="status-box">PASSIVE MONITORING</div>
+        </header>
+
+        <div class="hero" id="hero-box">
+            <h1>Statistical Precision & AI Intelligence</h1>
+            <p>
+                <strong>4cThreat</strong> fuses classical signal processing mathematics with advanced AI-driven classification.
+                We combine the reliability of deterministic statistical models with the adaptability of deep learning to provide 
+                unmatched situational awareness and multi-vector threat tracking.
+            </p>
+        </div>
+
+        <div class="cta-container">
+            <a href="https://www.linkedin.com/company/forgingops" target="_blank" class="btn">Connect on LinkedIn</a>
+        </div>
+
+        <div class="hud" id="hud-box">
+            <div class="hud-section">
+                <span class="hud-title">Target Telemetry (Cursor)</span>
+                <div class="telemetry-grid">
+                    <div class="t-box"><span class="t-label">SIGNATURE ID</span><span class="t-val" id="val-id">--</span></div>
+                    <div class="t-box"><span class="t-label">ASSESSMENT</span><span class="t-val" id="val-class">ANALYZING</span></div>
+                </div>
+            </div>
+            <div class="hud-section">
+                <span class="hud-title">Vector Data (Rel. HQ)</span>
+                <div class="telemetry-grid">
+                    <div class="t-box"><span class="t-label">RNG</span><span class="t-val" id="val-rng">0m</span></div>
+                    <div class="t-box"><span class="t-label">AZ</span><span class="t-val" id="val-az">000°</span></div>
+                    <div class="t-box"><span class="t-label">EL</span><span class="t-val" id="val-el">00°</span></div>
+                </div>
+            </div>
+            <div class="hud-section">
+                <span class="hud-title">Spatial Offset (Meters)</span>
+                <div class="telemetry-grid">
+                    <div class="t-box"><span class="t-label">X</span><span class="t-val" id="val-x">0</span></div>
+                    <div class="t-box"><span class="t-label">Y</span><span class="t-val" id="val-y">0</span></div>
+                    <div class="t-box"><span class="t-label">Z</span><span class="t-val" id="val-z">0</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('load', function() {
+            
+            const canvas = document.getElementById('c');
+            const ctx = canvas.getContext('2d');
+            
+            const uiStatus = document.getElementById('status');
+            const uiID = document.getElementById('val-id');
+            const uiClass = document.getElementById('val-class');
+            const uiRng = document.getElementById('val-rng');
+            const uiAz = document.getElementById('val-az');
+            const uiEl = document.getElementById('val-el');
+            const uiX = document.getElementById('val-x');
+            const uiY = document.getElementById('val-y');
+            const uiZ = document.getElementById('val-z');
+
+            let w, h, cx, cy;
+            let mx = 0, my = 0; 
+
+            // Config
+            const BUFFER_SIZE = 70; 
+            const TRAIL_MAX = 25; 
+            const CALLSIGNS = ["ALPHA", "BRAVO", "CHARLIE", "DELTA", "ECHO", "SIERRA", "TANGO", "ZULU"];
+            
+            // Zones
+            const zones = [
+                { name: "HQ_PRIME", type: "circle", x: 0, y: 0, r: 120 },
+                { name: "ASSET_A", type: "rect", x: 250, y: -200, w: 250, h: 180 },
+                { name: "CORRIDOR_7", type: "poly", points: [{x:-450, y:180}, {x:-200, y:180}, {x:-150, y:300}, {x:-500, y:300}] }
+            ];
+
+            const bots = [];
+            const NUM_BOTS = 10;
+
+            let playerID = null;
+            let playerTrail = [];
+            let globalThreatLevel = 0; // 0=Safe, 1=Warn, 2=Crit
+
+            // --- INIT ---
+            function resize() {
+                w = window.innerWidth;
+                h = window.innerHeight;
+                canvas.width = w;
+                canvas.height = h;
+                cx = w / 2;
+                cy = h / 2;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            window.addEventListener('mousemove', e => {
+                mx = e.clientX;
+                my = e.clientY;
+            });
+
+            // Init Bots
+            for(let i=0; i<NUM_BOTS; i++) {
+                bots.push({
+                    x: (Math.random() - 0.5) * w * 0.9, 
+                    y: (Math.random() - 0.5) * h * 0.9,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: (Math.random() - 0.5) * 2,
+                    id: "AI-" + Math.floor(Math.random()*900+100),
+                    trail: []
+                });
+            }
+
+            // --- THREAT LOGIC ---
+            function getThreatLevel(tx, ty) {
+                let maxThreat = 0;
+                zones.forEach(z => {
+                    ctx.beginPath();
+                    if(z.type === 'circle') ctx.arc(cx + z.x, cy + z.y, z.r, 0, Math.PI*2);
+                    else if(z.type === 'rect') ctx.rect(cx + z.x, cy + z.y, z.w, z.h);
+                    else if(z.type === 'poly') {
+                        ctx.moveTo(cx + z.points[0].x, cy + z.points[0].y);
+                        z.points.forEach(p => ctx.lineTo(cx + p.x, cy + p.y));
+                        ctx.closePath();
+                    }
+
+                    if(ctx.isPointInPath(tx, ty)) {
+                        maxThreat = 2; // Critical
+                        return;
+                    }
+                    if (maxThreat < 1) {
+                        ctx.lineWidth = BUFFER_SIZE * 2;
+                        if (ctx.isPointInStroke(tx, ty)) maxThreat = 1; // Warning
+                    }
+                });
+                return maxThreat;
+            }
+
+            // --- LOOP ---
+            function draw() {
+                // 1. Background Color
+                ctx.fillStyle = '#1c1c22'; 
+                ctx.fillRect(0, 0, w, h);
+
+                // 2. Enhanced Grid / Mesh / Terrain Hint
+                ctx.lineWidth = 1;
+                
+                // Minor Mesh lines
+                ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+                ctx.beginPath();
+                for(let x=0; x<w; x+=30) { ctx.moveTo(x,0); ctx.lineTo(x,h); }
+                for(let y=0; y<h; y+=30) { ctx.moveTo(0,y); ctx.lineTo(w,y); }
+                ctx.stroke();
+
+                // Major Grid lines
+                ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+                ctx.beginPath();
+                for(let x=0; x<w; x+=120) { ctx.moveTo(x,0); ctx.lineTo(x,h); }
+                for(let y=0; y<h; y+=120) { ctx.moveTo(0,y); ctx.lineTo(w,y); }
+                ctx.stroke();
+
+                // Horizon hint
+                ctx.strokeStyle = 'rgba(0, 255, 65, 0.03)';
+                ctx.beginPath();
+                for(let i=1; i<4; i++) {
+                     let yOffset = cy + (i*i*40);
+                     ctx.moveTo(0, yOffset); ctx.lineTo(w, yOffset);
+                }
+                ctx.stroke();
+
+                let currentFrameMaxThreat = 0;
+
+                // 3. Draw Zones
+                zones.forEach(z => {
+                    ctx.beginPath();
+                    if(z.type === 'circle') ctx.arc(cx + z.x, cy + z.y, z.r, 0, Math.PI*2);
+                    else if(z.type === 'rect') ctx.rect(cx + z.x, cy + z.y, z.w, z.h);
+                    else if(z.type === 'poly') {
+                        ctx.moveTo(cx + z.points[0].x, cy + z.points[0].y);
+                        z.points.forEach(p => ctx.lineTo(cx + p.x, cy + p.y));
+                        ctx.closePath();
+                    }
+
+                    // Buffer Line
+                    ctx.lineJoin = "round";
+                    ctx.lineWidth = BUFFER_SIZE * 2;
+                    ctx.strokeStyle = 'rgba(255, 204, 0, 0.04)'; 
+                    ctx.stroke();
+
+                    // Inner Zone
+                    ctx.fillStyle = (globalThreatLevel === 2) ? 'rgba(255, 42, 42, 0.2)' : 'rgba(0, 255, 65, 0.05)';
+                    ctx.strokeStyle = (globalThreatLevel === 2) ? '#ff2a2a' : '#00ff41';
+                    ctx.lineWidth = 2;
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = (globalThreatLevel === 2) ? '#ff2a2a' : '#888';
+                    ctx.font = '10px monospace';
+                    let lx = (z.type === 'circle') ? z.x : (z.type === 'rect' ? z.x : z.points[0].x);
+                    let ly = (z.type === 'circle') ? z.y : (z.type === 'rect' ? z.y : z.points[0].y);
+                    ctx.fillText(z.name, cx + lx, cy + ly);
+                });
+
+                // 4. Process Bots & Vectors
+                bots.forEach(b => {
+                    b.x += b.vx; b.y += b.vy;
+                    if(Math.abs(b.x) > w/2) b.vx *= -1;
+                    if(Math.abs(b.y) > h/2) b.vy *= -1;
+
+                    const threat = getThreatLevel(cx + b.x, cy + b.y);
+                    if (threat > currentFrameMaxThreat) currentFrameMaxThreat = threat;
+
+                    const isHostile = (threat >= 1);
+                    const color = (threat === 2) ? '#ff2a2a' : (threat === 1 ? '#ffcc00' : '#00ff41');
+                    
+                    b.trail.push({x: b.x, y: b.y});
+                    if(b.trail.length > TRAIL_MAX) b.trail.shift();
+
+                    if(b.trail.length > 1) {
+                        ctx.beginPath();
+                        b.trail.forEach((t, i) => i===0 ? ctx.moveTo(cx+t.x, cy+t.y) : ctx.lineTo(cx+t.x, cy+t.y));
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+
+                    // Draw Vector to HQ if Hostile/Warn
+                    if (isHostile) {
+                        ctx.beginPath();
+                        ctx.moveTo(cx, cy);
+                        ctx.lineTo(cx + b.x, cy + b.y);
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = (threat === 2) ? 3 : 1;
+                        ctx.stroke();
+                        
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(cx + b.x - 8, cy + b.y - 8, 16, 16);
+                    }
+
+                    ctx.fillStyle = color;
+                    ctx.fillRect(cx + b.x - 3, cy + b.y - 3, 6, 6);
+                });
+
+                // 5. Process Player (Mouse)
+                const playerThreat = getThreatLevel(mx, my);
+                if (playerThreat > currentFrameMaxThreat) currentFrameMaxThreat = playerThreat;
+
+                // Update Global State based on MAX threat found in frame
+                globalThreatLevel = currentFrameMaxThreat;
+
+                // UI Updates
+                if (globalThreatLevel === 2) {
+                    document.documentElement.style.setProperty('--safe', '#ff2a2a');
+                    uiStatus.innerText = "CRITICAL BREACH DETECTED";
+                    uiStatus.className = "status-box red-alert";
+                    uiClass.innerText = "HOSTILE";
+                    uiClass.className = "t-val alert-text";
+                } else if (globalThreatLevel === 1) {
+                    document.documentElement.style.setProperty('--safe', '#ffcc00');
+                    uiStatus.innerText = "WARNING: BUFFER ENTRY";
+                    uiStatus.className = "status-box warning";
+                    uiClass.innerText = "SUSPICIOUS";
+                    uiClass.className = "t-val warn-text";
+                } else {
+                    document.documentElement.style.setProperty('--safe', '#00ff41');
+                    uiStatus.innerText = "PASSIVE MONITORING";
+                    uiStatus.className = "status-box";
+                    uiClass.innerText = "ANALYZING";
+                    uiClass.className = "t-val";
+                }
+
+                // Player ID Logic
+                if (playerThreat > 0 && !playerID) {
+                     playerID = "UAS-" + CALLSIGNS[Math.floor(Math.random()*CALLSIGNS.length)];
+                } else if (playerThreat === 0) {
+                     playerID = null;
+                }
+
+                // Draw Player Vector
+                if (playerThreat > 0) {
+                    const pColor = (playerThreat === 2) ? '#ff2a2a' : '#ffcc00';
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy);
+                    ctx.lineTo(mx, my);
+                    ctx.strokeStyle = pColor;
+                    ctx.lineWidth = (playerThreat === 2) ? 3 : 1;
+                    ctx.stroke();
+
+                    // HUD Update
+                    const dx = mx - cx;
+                    const dy = my - cy;
+                    const rng = Math.sqrt(dx*dx + dy*dy);
+                    let az = Math.atan2(dy, dx) * (180/Math.PI);
+                    az = (az + 90 + 360) % 360;
+                    
+                    uiID.innerText = playerID;
+                    uiRng.innerText = rng.toFixed(0) + "m";
+                    uiAz.innerText = az.toFixed(0).padStart(3,0) + "°";
+                    uiX.innerText = dx.toFixed(0);
+                    uiY.innerText = (dy*-1).toFixed(0);
+
+                    playerTrail.push({x: mx, y: my});
+                    if(playerTrail.length > TRAIL_MAX) playerTrail.shift();
+
+                    if(playerTrail.length > 1) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = pColor;
+                        ctx.lineWidth = 2;
+                        playerTrail.forEach((t, i) => i===0 ? ctx.moveTo(t.x, t.y) : ctx.lineTo(t.x, t.y));
+                        ctx.stroke();
+                    }
+
+                    ctx.strokeRect(mx-15, my-15, 30, 30);
+                    ctx.fillStyle = pColor;
+                    ctx.font = 'bold 11px monospace';
+                    ctx.fillText(playerID, mx+20, my);
+                } else {
+                    // Safe mouse
+                    ctx.fillStyle = '#00ff41';
+                    ctx.fillRect(mx-2, my-2, 4, 4);
+                    // Passive dashed vector
+                    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(mx, my);
+                    ctx.strokeStyle = 'rgba(0, 255, 65, 0.2)'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
+                    
+                    if(uiID.innerText !== "--") {
+                        uiID.innerText = "--"; uiRng.innerText = "0m";
+                    }
+                }
+
+                // 6. Red Alert Vignette Strobe (Frame effect at edges)
+                if (globalThreatLevel === 2) {
+                    const flash = Math.sin(Date.now() / 100); // Strobe speed
+                    if (flash > 0) {
+                        const gradient = ctx.createRadialGradient(cx, cy, h*0.3, cx, cy, Math.max(w,h)*0.8);
+                        gradient.addColorStop(0, 'rgba(255, 0, 0, 0.0)');
+                        const intensity = 0.3 + (flash * 0.4);
+                        gradient.addColorStop(1, `rgba(255, 0, 0, ${intensity})`);
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(0, 0, w, h);
+                    }
+                }
+
+                requestAnimationFrame(draw);
+            }
+
+            draw();
+        });
+    </script>
+</body>
+</html>
