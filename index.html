@@ -147,34 +147,31 @@
         
         .live-text { color: var(--safe); font-weight: bold; }
 
-        /* --- REFINED INITIALIZE BUTTON (Less Glow) --- */
         .scroll-hint {
             position: absolute;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            
-            /* Solid Tactical Look */
-            color: #000;
-            background-color: var(--safe);
-            font-family: 'Black Ops One', cursive;
-            font-size: 16px;
-            letter-spacing: 2px;
-            padding: 12px 30px;
-            border: 2px solid var(--safe);
-            cursor: pointer;
-            z-index: 100;
-            
-            /* Subtle shadow, no pulse animation */
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            color: #555;
+            font-size: 14px;
+            animation: bounce 2s infinite;
             text-transform: uppercase;
-            transition: all 0.2s ease-in-out;
+            letter-spacing: 3px;
+            cursor: pointer;
+            border-bottom: 1px solid transparent;
+            padding-bottom: 5px;
         }
 
         .scroll-hint:hover {
-            background-color: #0b0b0e; /* Darken on hover */
             color: var(--safe);
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.4); /* Gentle glow on interaction only */
+            border-bottom: 1px solid var(--safe);
+            text-shadow: 0 0 10px var(--safe);
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateX(-50%) translateY(0);}
+            40% {transform: translateX(-50%) translateY(-10px);}
+            60% {transform: translateX(-50%) translateY(-5px);}
         }
 
         /* --- SECTION 2: LIVE SYSTEM --- */
@@ -225,6 +222,7 @@
 
         .mini-logo { font-size: 24px; color: #fff; }
         .mini-logo span { color: var(--safe); }
+        .time-text { font-size: 18px; color: #888; margin-left: 10px; font-weight: normal; letter-spacing: 1px; }
 
         .status-box {
             background: rgba(0, 20, 0, 0.8);
@@ -263,7 +261,7 @@
         .alert-text { color: var(--alert) !important; text-shadow: 0 0 8px var(--alert); }
         .warn-text { color: var(--warn) !important; }
 
-        /* --- SECTION 3: TEAM --- */
+        /* --- SECTION 3: TEAM (GRID LAYOUT) --- */
         .team-section {
             padding: 80px 20px;
             background: #0f0f12;
@@ -281,43 +279,54 @@
             font-family: 'Black Ops One', cursive;
         }
 
+        /* 2x2 Grid Layout */
         .team-grid {
-            display: flex;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 Columns strict */
             gap: 40px;
-            flex-wrap: wrap;
-            max-width: 1200px;
+            max-width: 900px;
             margin: 0 auto;
+        }
+
+        /* Phone: 1 Column */
+        @media (max-width: 768px) {
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .team-card {
             background: var(--card-bg);
             border: 1px solid #333;
-            width: 300px;
             padding: 30px;
             transition: 0.3s;
             position: relative;
             overflow: hidden;
+            width: 100%; /* Fill Grid Cell */
+            box-sizing: border-box;
         }
         .team-card:hover {
             border-color: var(--safe);
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
+        /* Tactical Markers */
         .team-card::before { content: ''; position: absolute; top: 0; left: 0; width: 10px; height: 10px; border-top: 2px solid var(--safe); border-left: 2px solid var(--safe); }
         .team-card::after { content: ''; position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; border-bottom: 2px solid var(--safe); border-right: 2px solid var(--safe); }
 
         .role-badge {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--safe);
-            background: rgba(0, 255, 65, 0.1);
+            background: rgba(0, 255, 65, 0.05);
             padding: 5px 10px;
             display: inline-block;
             margin-bottom: 15px;
             border: 1px solid rgba(0, 255, 65, 0.2);
+            text-transform: uppercase;
         }
 
-        .member-name { font-size: 22px; color: #fff; margin: 0 0 5px 0; text-transform: uppercase; }
+        .member-name { font-size: 20px; color: #fff; margin: 0 0 5px 0; text-transform: uppercase; font-weight: bold; }
+        .degree { font-size: 14px; color: #888; font-family: 'Share Tech Mono'; }
 
         .member-contact {
             margin-top: 20px;
@@ -326,7 +335,7 @@
             gap: 15px;
             align-items: center;
         }
-        .member-email { font-size: 14px; color: #888; }
+        .member-email { font-size: 13px; color: #888; }
         .member-email:hover { color: var(--safe); }
 
         /* --- FOOTER --- */
@@ -386,7 +395,6 @@
             <p class="desc-line">
                 <strong>Foresee Threat</strong> fuses statistical precision and AI for unmatched situational awareness and multi-vector threat tracking.
             </p>
-
             <p class="sub-desc">
                 Our hardware architecture integrates multi-modal sensor fusion for seamless active and passive monitoring.
             </p>
@@ -411,7 +419,10 @@
 
         <div class="ui-layer">
             <header class="system-header">
-                <div class="mini-logo" id="active-panel-id">4cT_JayHawk_1587 / SYS_ACTIVE</div>
+                <div class="mini-logo">
+                    4cT_JayHawk_1587 / SYS_ACTIVE
+                    <span class="time-text" id="sys-time">[ 00:00:00 ]</span>
+                </div>
                 
                 <div id="status" class="status-box">PASSIVE MONITORING</div>
             </header>
@@ -449,30 +460,37 @@
         
         <div class="team-grid">
             <div class="team-card">
-                <div class="role-badge">FOUNDER & LEAD</div>
-                <h3 class="member-name">Dr. Talasila</h3>
+                <div class="role-badge">Founder & Lead Architect</div>
+                <h3 class="member-name">Hara Madhav Talasila<span class="degree">, PhD</span></h3>
                 <div class="member-contact">
-                    <a href="mailto:contact@4cthreat.com" class="member-email">contact@4cThreat.com</a>
-                    <a href="https://www.linkedin.com" target="_blank" class="icon-link" style="font-size: 24px;"><i class="fab fa-linkedin"></i></a>
+                    <a href="mailto:hara@4cThreat.com" class="member-email">hara@4cThreat.com</a>
+                    <a href="https://www.linkedin.com/in/haramadhav" target="_blank" class="icon-link" style="font-size: 20px;"><i class="fab fa-linkedin"></i></a>
                 </div>
             </div>
 
             <div class="team-card">
-                <div class="role-badge">OPERATIONS</div>
-                <h3 class="member-name">R. Anderson</h3>
+                <div class="role-badge">Principal Engineer (Radar/AI)</div>
+                <h3 class="member-name">Soumyaroop Nandi<span class="degree">, PhD</span></h3>
                 <div class="member-contact">
-                    <a href="mailto:contact@4cthreat.com" class="member-email">r.anderson@4cThreat.com</a>
-                    <a href="#" class="icon-link" style="font-size: 24px;"><i class="fab fa-linkedin"></i></a>
+                    <a href="mailto:nandi@4cThreat.com" class="member-email">nandi@4cThreat.com</a>
+                    <a href="https://www.linkedin.com/in/soumyaroop-nandi-6a412967" target="_blank" class="icon-link" style="font-size: 20px;"><i class="fab fa-linkedin"></i></a>
                 </div>
             </div>
 
             <div class="team-card">
-                <div class="role-badge">SYSTEMS ARCHITECT</div>
-                <h3 class="member-name">J. Doe</h3>
+                <div class="role-badge">Principal Engineer (Sensor Fusion)</div>
+                <h3 class="member-name">Syed Faiz Ahmed</h3>
                 <div class="member-contact">
-                    <a href="mailto:contact@4cthreat.com" class="member-email">j.doe@4cThreat.com</a>
-                    <a href="#" class="icon-link" style="font-size: 24px;"><i class="fab fa-linkedin"></i></a>
-                </div>
+                    <a href="mailto:faiz@4cThreat.com" class="member-email">faiz@4cThreat.com</a>
+                    </div>
+            </div>
+
+             <div class="team-card">
+                <div class="role-badge">Principal Engineer (Embedded)</div>
+                <h3 class="member-name">Akhilesh Mishra</h3>
+                <div class="member-contact">
+                    <a href="mailto:akhilesh@4cThreat.com" class="member-email">akhilesh@4cThreat.com</a>
+                    </div>
             </div>
         </div>
     </section>
@@ -500,28 +518,12 @@
     <script>
         window.addEventListener('load', function() {
             
-            // --- LOCATION DETECTION LOGIC ---
-            // Attempts to guess city based on Timezone to create the "4cT_[City]" effect
-            try {
-                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone; // e.g. "America/Chicago"
-                if (tz && tz.includes('/')) {
-                    const city = tz.split('/')[1].replace(/_/g, ' ').toUpperCase();
-                    // Update the panel ID
-                    const panel = document.getElementById('active-panel-id');
-                    if(panel) {
-                        panel.innerHTML = `4cT_${city} / SYS_ACTIVE <span style="color:var(--safe)">●</span>`;
-                    }
-                }
-            } catch (e) {
-                // Fallback is already hardcoded in HTML: 4cT_JayHawk_1587
-                console.log("Location detection fallback engaged.");
-            }
-
             const container = document.getElementById('sys-container');
             const canvas = document.getElementById('c');
             const ctx = canvas.getContext('2d');
             
             const uiStatus = document.getElementById('status');
+            const uiTime = document.getElementById('sys-time');
             const uiID = document.getElementById('val-id');
             const uiClass = document.getElementById('val-class');
             const uiRng = document.getElementById('val-rng');
@@ -575,14 +577,21 @@
                 mouseInCanvas = false;
             });
 
-            // Init Bots
+            // Init Bots (Mixed Types)
             for(let i=0; i<NUM_BOTS; i++) {
+                // Determine Type
+                let type = (Math.random() > 0.5) ? 'QUAD' : 'OCTO';
+                let isLoiter = (i === 0); // First bot is a Loiterer
+                
                 bots.push({
                     x: (Math.random() - 0.5) * w * 0.9, 
                     y: (Math.random() - 0.5) * h * 0.9,
-                    vx: (Math.random() - 0.5) * 2,
-                    vy: (Math.random() - 0.5) * 2,
-                    id: "AI-" + Math.floor(Math.random()*900+100),
+                    vx: isLoiter ? 0 : (Math.random() - 0.5) * 2,
+                    vy: isLoiter ? 0 : (Math.random() - 0.5) * 2,
+                    type: type,
+                    isLoiter: isLoiter,
+                    loiterAngle: 0,
+                    id: isLoiter ? "LOITER_42" : "UAV-" + Math.floor(Math.random()*900+100),
                     trail: []
                 });
             }
@@ -612,8 +621,33 @@
                 return maxThreat;
             }
 
+            // --- DRAW DRONE SHAPES ---
+            function drawDrone(ctx, x, y, color, type) {
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                if (type === 'QUAD') {
+                    // X Shape
+                    ctx.moveTo(x-5, y-5); ctx.lineTo(x+5, y+5);
+                    ctx.moveTo(x+5, y-5); ctx.lineTo(x-5, y+5);
+                    ctx.stroke();
+                    ctx.strokeRect(x-2, y-2, 4, 4);
+                } else {
+                    // Octo Shape (Circle with lines)
+                    ctx.arc(x, y, 4, 0, Math.PI*2);
+                    ctx.moveTo(x, y-6); ctx.lineTo(x, y+6);
+                    ctx.moveTo(x-6, y); ctx.lineTo(x+6, y);
+                    ctx.stroke();
+                }
+            }
+
             // --- LOOP ---
             function draw() {
+                // Update Time
+                const now = new Date();
+                uiTime.innerText = `[ ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} ]`;
+
                 ctx.fillStyle = '#0b0b0e'; 
                 ctx.fillRect(0, 0, w, h);
 
@@ -664,9 +698,15 @@
 
                 // Bots
                 bots.forEach(b => {
-                    b.x += b.vx; b.y += b.vy;
-                    if(Math.abs(b.x) > w/2) b.vx *= -1;
-                    if(Math.abs(b.y) > h/2) b.vy *= -1;
+                    if (b.isLoiter) {
+                        b.loiterAngle += 0.01;
+                        b.x = -250 + Math.cos(b.loiterAngle) * 60;
+                        b.y = -250 + Math.sin(b.loiterAngle) * 60;
+                    } else {
+                        b.x += b.vx; b.y += b.vy;
+                        if(Math.abs(b.x) > w/2) b.vx *= -1;
+                        if(Math.abs(b.y) > h/2) b.vy *= -1;
+                    }
 
                     const threat = getThreatLevel(cx + b.x, cy + b.y);
                     if (threat > currentFrameMaxThreat) currentFrameMaxThreat = threat;
@@ -685,7 +725,7 @@
                         ctx.stroke();
                     }
 
-                    if (isHostile) {
+                    if (isHostile || b.isLoiter) {
                         ctx.beginPath();
                         ctx.moveTo(cx, cy);
                         ctx.lineTo(cx + b.x, cy + b.y);
@@ -695,13 +735,13 @@
                         ctx.stroke();
                         ctx.setLineDash([]);
                         
-                        ctx.strokeStyle = color;
-                        ctx.lineWidth = 2;
-                        ctx.strokeRect(cx + b.x - 6, cy + b.y - 6, 12, 12);
+                        // Draw Drone Shape
+                        drawDrone(ctx, cx + b.x, cy + b.y, color, b.type);
                         
                         ctx.font = '10px "Share Tech Mono"';
                         ctx.fillStyle = color;
-                        ctx.fillText(b.id, cx + b.x + 10, cy + b.y);
+                        ctx.fillText(b.id, cx + b.x + 12, cy + b.y);
+                        if(b.isLoiter) ctx.fillText("[LOITERING]", cx + b.x + 12, cy + b.y + 10);
                     } else {
                         ctx.fillStyle = color;
                         ctx.fillRect(cx + b.x - 2, cy + b.y - 2, 4, 4);
@@ -755,10 +795,16 @@
                             ctx.stroke();
                         }
 
-                        ctx.strokeRect(mx-15, my-15, 30, 30);
+                        // Draw Player Shape (Triangle)
+                        ctx.strokeStyle = pColor;
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(mx, my-8); ctx.lineTo(mx+7, my+8); ctx.lineTo(mx-7, my+8); ctx.closePath();
+                        ctx.stroke();
+
                         ctx.fillStyle = pColor;
                         ctx.font = 'bold 12px "Share Tech Mono"';
-                        ctx.fillText(playerID, mx+20, my);
+                        ctx.fillText(playerID, mx+15, my);
                     } else {
                         ctx.fillStyle = '#00ff41';
                         ctx.fillRect(mx-2, my-2, 4, 4);
