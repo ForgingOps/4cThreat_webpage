@@ -29,7 +29,7 @@
             background-color: var(--bg);
             font-family: 'Share Tech Mono', monospace; 
             color: var(--safe);
-            overflow-x: hidden; /* Strict overflow control */
+            overflow-x: hidden;
             scroll-behavior: smooth;
         }
 
@@ -42,8 +42,7 @@
 
         /* --- SECTION 1: INTRO --- */
         .intro-section {
-            /* Changed to min-height to prevent text spill on small vertical screens */
-            min-height: 65vh; 
+            min-height: 70vh; 
             width: 100%;
             display: flex;
             flex-direction: column;
@@ -54,7 +53,7 @@
             z-index: 20;
             border-bottom: 2px solid #333;
             box-shadow: 0 10px 50px rgba(0,0,0,0.8);
-            padding-bottom: 40px; /* Space for the scroll hint */
+            padding-bottom: 60px; 
         }
 
         .intro-content {
@@ -75,7 +74,6 @@
         .intro-logo span { color: var(--safe); }
 
         .intro-content h1 {
-            /* Clamp font size: Minimum 22px, Preferred 3vw, Maximum 50px */
             font-size: clamp(22px, 3vw, 50px);
             white-space: nowrap; 
             color: #ccc;
@@ -89,18 +87,26 @@
         .desc-line {
             font-size: clamp(14px, 1.2vw, 20px);
             white-space: nowrap;
+            color: #ccc;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .sub-desc {
+            font-size: clamp(12px, 1vw, 16px);
+            white-space: nowrap;
             color: #888;
             margin-bottom: 25px;
             display: block;
+            letter-spacing: 1px;
         }
 
-        /* Responsive Breakpoint: Allow wrapping on mobile to prevent overflow */
         @media (max-width: 900px) {
             .intro-content h1 { white-space: normal; }
             .desc-line { white-space: normal; line-height: 1.5; }
+            .sub-desc { white-space: normal; line-height: 1.5; }
         }
 
-        /* Contact Bar */
         .contact-bar {
             display: flex;
             justify-content: center;
@@ -141,20 +147,35 @@
         
         .live-text { color: var(--safe); font-weight: bold; }
 
-        /* Scroll Hint / Initialize System */
+        /* --- REFINED INITIALIZE BUTTON (Less Glow) --- */
         .scroll-hint {
             position: absolute;
-            bottom: 20px;
-            color: #555;
-            font-size: 12px;
-            animation: blink 2s infinite;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            
+            /* Solid Tactical Look */
+            color: #000;
+            background-color: var(--safe);
+            font-family: 'Black Ops One', cursive;
+            font-size: 16px;
+            letter-spacing: 2px;
+            padding: 12px 30px;
+            border: 2px solid var(--safe);
+            cursor: pointer;
+            z-index: 100;
+            
+            /* Subtle shadow, no pulse animation */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
             text-transform: uppercase;
-            letter-spacing: 3px;
-            cursor: default;
-            user-select: none;
+            transition: all 0.2s ease-in-out;
         }
 
-        @keyframes blink { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
+        .scroll-hint:hover {
+            background-color: #0b0b0e; /* Darken on hover */
+            color: var(--safe);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.4); /* Gentle glow on interaction only */
+        }
 
         /* --- SECTION 2: LIVE SYSTEM --- */
         .system-section {
@@ -332,7 +353,6 @@
             flex-wrap: wrap;
         }
 
-        /* Actionable Footer Links */
         .footer-item-link {
             display: flex;
             align-items: center;
@@ -366,6 +386,10 @@
             <p class="desc-line">
                 <strong>Foresee Threat</strong> fuses statistical precision and AI for unmatched situational awareness and multi-vector threat tracking.
             </p>
+
+            <p class="sub-desc">
+                Our hardware architecture integrates multi-modal sensor fusion for seamless active and passive monitoring.
+            </p>
             
             <div class="contact-bar">
                 <a href="https://www.linkedin.com/company/4cthreat" target="_blank" class="icon-link" title="LinkedIn">
@@ -379,7 +403,7 @@
             </div>
         </div>
 
-        <div class="scroll-hint">▼ Initialize System ▼</div>
+        <a href="#sys-container" class="scroll-hint">▼ Initialize System ▼</a>
     </section>
 
     <section class="system-section" id="sys-container">
@@ -387,7 +411,8 @@
 
         <div class="ui-layer">
             <header class="system-header">
-                <div class="mini-logo">4c<span>T</span> / SYS_ACTIVE</div>
+                <div class="mini-logo" id="active-panel-id">4cT_JayHawk_1587 / SYS_ACTIVE</div>
+                
                 <div id="status" class="status-box">PASSIVE MONITORING</div>
             </header>
 
@@ -475,6 +500,23 @@
     <script>
         window.addEventListener('load', function() {
             
+            // --- LOCATION DETECTION LOGIC ---
+            // Attempts to guess city based on Timezone to create the "4cT_[City]" effect
+            try {
+                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone; // e.g. "America/Chicago"
+                if (tz && tz.includes('/')) {
+                    const city = tz.split('/')[1].replace(/_/g, ' ').toUpperCase();
+                    // Update the panel ID
+                    const panel = document.getElementById('active-panel-id');
+                    if(panel) {
+                        panel.innerHTML = `4cT_${city} / SYS_ACTIVE <span style="color:var(--safe)">●</span>`;
+                    }
+                }
+            } catch (e) {
+                // Fallback is already hardcoded in HTML: 4cT_JayHawk_1587
+                console.log("Location detection fallback engaged.");
+            }
+
             const container = document.getElementById('sys-container');
             const canvas = document.getElementById('c');
             const ctx = canvas.getContext('2d');
