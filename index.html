@@ -4,13 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4cThreat Airspace Intelligence</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
             --safe: #00ff41;    /* Monitoring Green */
             --warn: #ffcc00;    /* Analysis Yellow */
             --alert: #ff2a2a;   /* Critical Red */
-            --bg: #1c1c22;      /* Lighter Tactical Slate Grey */
-            --panel: rgba(15, 15, 20, 0.9);
+            --bg: #0b0b0e;      /* Deep Dark Tactical */
+            --panel: rgba(10, 10, 15, 0.85);
+            --grid-line: rgba(255, 255, 255, 0.05);
         }
 
         body, html {
@@ -18,10 +26,124 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden;
             background-color: var(--bg);
-            font-family: 'Consolas', 'Monaco', monospace;
+            font-family: 'Share Tech Mono', monospace; 
             color: var(--safe);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* TYPOGRAPHY OVERRIDES */
+        h1, h2, h3, .logo, .status-box, .btn {
+            font-family: 'Black Ops One', cursive;
+            letter-spacing: 2px;
+        }
+
+        /* --- SECTION 1: INTRO (COMPACT) --- */
+        .intro-section {
+            height: 60vh; /* Reduced from 100vh */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #1a1a20 0%, #000 100%);
+            position: relative;
+            z-index: 20;
+            border-bottom: 2px solid #333;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.8);
+        }
+
+        .intro-content {
+            text-align: center;
+            width: 90%;
+            max-width: 1200px;
+            padding: 20px;
+            z-index: 2;
+        }
+
+        .intro-logo {
+            font-size: 60px;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            text-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+        }
+        .intro-logo span { color: var(--safe); }
+
+        .intro-content h1 {
+            font-size: 2.5vw; /* Responsive font size to keep one line */
+            white-space: nowrap; /* Forces one line */
+            color: #ccc;
+            margin: 10px 0 20px 0;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--safe);
+            display: inline-block;
+            padding-bottom: 10px;
+            min-font-size: 24px;
+        }
+
+        .intro-content p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #888;
+            margin-bottom: 30px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Contact Bar Styling */
+        .contact-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin-top: 10px;
+        }
+
+        .icon-link {
+            color: var(--safe);
+            font-size: 32px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .icon-link:hover {
+            color: #fff;
+            text-shadow: 0 0 15px var(--safe);
+            transform: scale(1.1);
+        }
+
+        .email-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #888;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.3);
+            transition: 0.3s;
+        }
+        .email-container:hover {
+            border-color: var(--safe);
+            color: #fff;
+        }
+        .email-container i { color: var(--safe); font-size: 16px; }
+
+        @media (max-width: 768px) {
+            .intro-content h1 { font-size: 18px; white-space: normal; }
+            .intro-section { height: auto; padding: 40px 0; }
+        }
+
+        /* --- SECTION 2: LIVE SYSTEM (CANVAS) --- */
+        .system-section {
+            height: 100vh; /* Full screen simulation */
+            width: 100%;
+            position: relative;
+            background-color: var(--bg);
+            overflow: hidden;
             cursor: crosshair;
         }
 
@@ -30,7 +152,9 @@
             position: absolute;
             top: 0;
             left: 0;
-            z-index: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
 
         /* UI Overlay Wrapper */
@@ -49,148 +173,127 @@
             box-sizing: border-box;
         }
 
-        /* Header */
-        .header {
+        .system-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-            padding-bottom: 20px;
-            background: linear-gradient(to right, rgba(0,0,0,0.9), transparent);
+            padding-bottom: 15px;
+            background: linear-gradient(to right, rgba(0,0,0,0.8), transparent);
+            pointer-events: auto;
         }
 
-        /* INCREASED LOGO SIZE */
-        .logo { font-size: 48px; font-weight: 800; letter-spacing: 4px; color: #fff; text-transform: uppercase; }
-        .logo span { color: var(--safe); }
+        .mini-logo { font-size: 24px; color: #fff; }
+        .mini-logo span { color: var(--safe); }
 
         .status-box {
-            background: rgba(0, 20, 0, 0.6);
-            border: 2px solid var(--safe);
+            background: rgba(0, 20, 0, 0.8);
+            border: 1px solid var(--safe);
             color: var(--safe);
-            padding: 10px 40px;
-            font-size: 16px;
-            font-weight: 900;
+            padding: 8px 30px;
+            font-size: 14px;
             text-transform: uppercase;
-            letter-spacing: 3px;
-            min-width: 250px;
+            letter-spacing: 2px;
+            min-width: 200px;
             text-align: center;
             transition: all 0.2s;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.1);
         }
         
-        .status-box.warning { border-color: var(--warn); color: var(--warn); background: rgba(40, 30, 0, 0.6); }
+        .status-box.warning { border-color: var(--warn); color: var(--warn); background: rgba(40, 30, 0, 0.8); }
         .status-box.red-alert { border-color: var(--alert); color: var(--alert); background: rgba(50, 0, 0, 0.9); box-shadow: 0 0 30px rgba(255, 42, 42, 0.5); }
-
-        /* CENTERED HERO TEXT */
-        .hero {
-            position: absolute;
-            top: 15%; 
-            left: 50%;
-            transform: translateX(-50%);
-            width: 70%;
-            text-align: center;
-            pointer-events: none;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
-        }
-        .hero h1 { margin: 0 0 15px 0; color: #fff; font-size: 36px; text-transform: uppercase; letter-spacing: 2px; font-weight: 900; }
-        .hero p { font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 24px; max-width: 900px; margin-left: auto; margin-right: auto;}
-        
-        /* BOTTOM LEFT CTA BUTTON */
-        .cta-container {
-            position: absolute;
-            bottom: 40px;
-            left: 40px;
-            pointer-events: auto;
-            z-index: 20;
-        }
-
-        .btn {
-            display: inline-block; 
-            padding: 15px 30px; 
-            border: 1px solid var(--safe);
-            color: var(--safe); 
-            text-decoration: none; 
-            font-size: 14px; 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-            transition: all 0.2s; 
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
-        }
-        .btn:hover { background: var(--safe); color: #000; box-shadow: 0 0 15px var(--safe); }
 
         /* HUD Panel */
         .hud {
-            align-self: flex-end; background: var(--panel); border: 1px solid rgba(255,255,255,0.1);
-            padding: 20px; width: 380px; font-size: 12px;
+            align-self: flex-end; 
+            background: var(--panel); 
+            border: 1px solid rgba(255,255,255,0.1);
+            border-left: 2px solid var(--safe);
+            padding: 20px; 
+            width: 380px; 
+            font-size: 12px;
             pointer-events: auto;
+            backdrop-filter: blur(4px);
         }
         
         .hud-section { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; }
-        .hud-title { color: #888; font-size: 11px; letter-spacing: 2px; margin-bottom: 8px; text-transform: uppercase; display: block;}
+        .hud-title { color: #888; font-size: 10px; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; display: block; font-weight: bold;}
         
         .telemetry-grid { display: flex; justify-content: space-between; text-align: center; }
         .t-box { flex: 1; }
-        .t-label { display: block; font-size: 9px; color: #666; letter-spacing: 1px; }
-        .t-val { display: block; font-size: 16px; font-weight: bold; color: #fff; margin-top: 4px; }
+        .t-label { display: block; font-size: 9px; color: #555; letter-spacing: 1px; }
+        .t-val { display: block; font-size: 18px; color: #fff; margin-top: 2px; text-shadow: 0 0 5px rgba(255,255,255,0.2); }
         
-        .alert-text { color: var(--alert) !important; }
+        .alert-text { color: var(--alert) !important; text-shadow: 0 0 8px var(--alert); }
         .warn-text { color: var(--warn) !important; }
 
     </style>
 </head>
 <body>
 
-    <canvas id="c"></canvas>
-
-    <div class="ui-layer">
-        <header class="header">
-            <div class="logo">4c<span>Threat</span></div>
-            <div id="status" class="status-box">PASSIVE MONITORING</div>
-        </header>
-
-        <div class="hero" id="hero-box">
+    <section class="intro-section">
+        <div class="intro-content">
+            <div class="intro-logo">4c<span>Threat</span></div>
             <h1>Commercial-grade Airspace Intelligence</h1>
             <p>
                 <strong>Foresee Threat</strong> fuses statistical precision and AI 
                 for unmatched situational awareness and multi-vector threat tracking.
             </p>
+            
+            <div class="contact-bar">
+                <a href="https://www.linkedin.com/company/4cthreat" target="_blank" class="icon-link" title="LinkedIn">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+                
+                <div class="email-container">
+                    <i class="fas fa-envelope"></i>
+                    <span>contact@4cThreat.com</span>
+                </div>
+            </div>
         </div>
+    </section>
 
-        <div class="cta-container">
-            <a href="https://www.linkedin.com/company/4cThreat" target="_blank" class="btn">4cThreat on LinkedIn</a>
-        </div>
+    <section class="system-section" id="sys-container">
+        <canvas id="c"></canvas>
 
-        <div class="hud" id="hud-box">
-            <div class="hud-section">
-                <span class="hud-title">Target Telemetry (Cursor)</span>
-                <div class="telemetry-grid">
-                    <div class="t-box"><span class="t-label">SIGNATURE ID</span><span class="t-val" id="val-id">--</span></div>
-                    <div class="t-box"><span class="t-label">ASSESSMENT</span><span class="t-val" id="val-class">ANALYZING</span></div>
+        <div class="ui-layer">
+            <header class="system-header">
+                <div class="mini-logo">4c<span>T</span> / SYS_ACTIVE</div>
+                <div id="status" class="status-box">PASSIVE MONITORING</div>
+            </header>
+
+            <div class="hud" id="hud-box">
+                <div class="hud-section">
+                    <span class="hud-title">Target Telemetry (Cursor)</span>
+                    <div class="telemetry-grid">
+                        <div class="t-box"><span class="t-label">SIGNATURE ID</span><span class="t-val" id="val-id">--</span></div>
+                        <div class="t-box"><span class="t-label">ASSESSMENT</span><span class="t-val" id="val-class">ANALYZING</span></div>
+                    </div>
                 </div>
-            </div>
-            <div class="hud-section">
-                <span class="hud-title">Vector Data (Rel. HQ)</span>
-                <div class="telemetry-grid">
-                    <div class="t-box"><span class="t-label">RNG</span><span class="t-val" id="val-rng">0m</span></div>
-                    <div class="t-box"><span class="t-label">AZ</span><span class="t-val" id="val-az">000°</span></div>
-                    <div class="t-box"><span class="t-label">EL</span><span class="t-val" id="val-el">00°</span></div>
+                <div class="hud-section">
+                    <span class="hud-title">Vector Data (Rel. HQ)</span>
+                    <div class="telemetry-grid">
+                        <div class="t-box"><span class="t-label">RNG</span><span class="t-val" id="val-rng">0m</span></div>
+                        <div class="t-box"><span class="t-label">AZ</span><span class="t-val" id="val-az">000°</span></div>
+                        <div class="t-box"><span class="t-label">EL</span><span class="t-val" id="val-el">00°</span></div>
+                    </div>
                 </div>
-            </div>
-            <div class="hud-section">
-                <span class="hud-title">Spatial Offset (Meters)</span>
-                <div class="telemetry-grid">
-                    <div class="t-box"><span class="t-label">X</span><span class="t-val" id="val-x">0</span></div>
-                    <div class="t-box"><span class="t-label">Y</span><span class="t-val" id="val-y">0</span></div>
-                    <div class="t-box"><span class="t-label">Z</span><span class="t-val" id="val-z">0</span></div>
+                <div class="hud-section">
+                    <span class="hud-title">Spatial Offset (Meters)</span>
+                    <div class="telemetry-grid">
+                        <div class="t-box"><span class="t-label">X</span><span class="t-val" id="val-x">0</span></div>
+                        <div class="t-box"><span class="t-label">Y</span><span class="t-val" id="val-y">0</span></div>
+                        <div class="t-box"><span class="t-label">Z</span><span class="t-val" id="val-z">0</span></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <script>
         window.addEventListener('load', function() {
             
+            const container = document.getElementById('sys-container');
             const canvas = document.getElementById('c');
             const ctx = canvas.getContext('2d');
             
@@ -199,13 +302,12 @@
             const uiClass = document.getElementById('val-class');
             const uiRng = document.getElementById('val-rng');
             const uiAz = document.getElementById('val-az');
-            const uiEl = document.getElementById('val-el');
             const uiX = document.getElementById('val-x');
             const uiY = document.getElementById('val-y');
-            const uiZ = document.getElementById('val-z');
 
             let w, h, cx, cy;
             let mx = 0, my = 0; 
+            let mouseInCanvas = false;
 
             // Config
             const BUFFER_SIZE = 70; 
@@ -220,16 +322,16 @@
             ];
 
             const bots = [];
-            const NUM_BOTS = 10;
+            const NUM_BOTS = 12;
 
             let playerID = null;
             let playerTrail = [];
-            let globalThreatLevel = 0; // 0=Safe, 1=Warn, 2=Crit
+            let globalThreatLevel = 0; 
 
             // --- INIT ---
             function resize() {
-                w = window.innerWidth;
-                h = window.innerHeight;
+                w = container.clientWidth;
+                h = container.clientHeight;
                 canvas.width = w;
                 canvas.height = h;
                 cx = w / 2;
@@ -238,9 +340,15 @@
             window.addEventListener('resize', resize);
             resize();
 
-            window.addEventListener('mousemove', e => {
-                mx = e.clientX;
-                my = e.clientY;
+            // Track mouse relative to CANVAS
+            canvas.addEventListener('mousemove', e => {
+                mx = e.offsetX;
+                my = e.offsetY;
+                mouseInCanvas = true;
+            });
+            
+            canvas.addEventListener('mouseleave', () => {
+                mouseInCanvas = false;
             });
 
             // Init Bots
@@ -282,39 +390,26 @@
 
             // --- LOOP ---
             function draw() {
-                // 1. Background Color
-                ctx.fillStyle = '#1c1c22'; 
+                ctx.fillStyle = '#0b0b0e'; 
                 ctx.fillRect(0, 0, w, h);
 
-                // 2. Enhanced Grid / Mesh / Terrain Hint
+                // Grid
                 ctx.lineWidth = 1;
-                
-                // Minor Mesh lines
-                ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+                ctx.strokeStyle = 'rgba(255,255,255,0.03)';
                 ctx.beginPath();
-                for(let x=0; x<w; x+=30) { ctx.moveTo(x,0); ctx.lineTo(x,h); }
-                for(let y=0; y<h; y+=30) { ctx.moveTo(0,y); ctx.lineTo(w,y); }
+                for(let x=0; x<w; x+=40) { ctx.moveTo(x,0); ctx.lineTo(x,h); }
+                for(let y=0; y<h; y+=40) { ctx.moveTo(0,y); ctx.lineTo(w,y); }
                 ctx.stroke();
 
-                // Major Grid lines
-                ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+                ctx.strokeStyle = 'rgba(0, 255, 65, 0.08)';
                 ctx.beginPath();
-                for(let x=0; x<w; x+=120) { ctx.moveTo(x,0); ctx.lineTo(x,h); }
-                for(let y=0; y<h; y+=120) { ctx.moveTo(0,y); ctx.lineTo(w,y); }
-                ctx.stroke();
-
-                // Horizon hint
-                ctx.strokeStyle = 'rgba(0, 255, 65, 0.03)';
-                ctx.beginPath();
-                for(let i=1; i<4; i++) {
-                     let yOffset = cy + (i*i*40);
-                     ctx.moveTo(0, yOffset); ctx.lineTo(w, yOffset);
-                }
+                for(let x=0; x<w; x+=200) { ctx.moveTo(x,0); ctx.lineTo(x,h); }
+                for(let y=0; y<h; y+=200) { ctx.moveTo(0,y); ctx.lineTo(w,y); }
                 ctx.stroke();
 
                 let currentFrameMaxThreat = 0;
 
-                // 3. Draw Zones
+                // Zones
                 zones.forEach(z => {
                     ctx.beginPath();
                     if(z.type === 'circle') ctx.arc(cx + z.x, cy + z.y, z.r, 0, Math.PI*2);
@@ -325,27 +420,25 @@
                         ctx.closePath();
                     }
 
-                    // Buffer Line
                     ctx.lineJoin = "round";
                     ctx.lineWidth = BUFFER_SIZE * 2;
-                    ctx.strokeStyle = 'rgba(255, 204, 0, 0.04)'; 
+                    ctx.strokeStyle = 'rgba(255, 204, 0, 0.05)'; 
                     ctx.stroke();
 
-                    // Inner Zone
                     ctx.fillStyle = (globalThreatLevel === 2) ? 'rgba(255, 42, 42, 0.2)' : 'rgba(0, 255, 65, 0.05)';
                     ctx.strokeStyle = (globalThreatLevel === 2) ? '#ff2a2a' : '#00ff41';
                     ctx.lineWidth = 2;
                     ctx.fill();
                     ctx.stroke();
 
-                    ctx.fillStyle = (globalThreatLevel === 2) ? '#ff2a2a' : '#888';
-                    ctx.font = '10px monospace';
+                    ctx.fillStyle = (globalThreatLevel === 2) ? '#ff2a2a' : '#555';
+                    ctx.font = '12px "Black Ops One", cursive';
                     let lx = (z.type === 'circle') ? z.x : (z.type === 'rect' ? z.x : z.points[0].x);
                     let ly = (z.type === 'circle') ? z.y : (z.type === 'rect' ? z.y : z.points[0].y);
                     ctx.fillText(z.name, cx + lx, cy + ly);
                 });
 
-                // 4. Process Bots & Vectors
+                // Bots
                 bots.forEach(b => {
                     b.x += b.vx; b.y += b.vy;
                     if(Math.abs(b.x) > w/2) b.vx *= -1;
@@ -368,32 +461,95 @@
                         ctx.stroke();
                     }
 
-                    // Draw Vector to HQ if Hostile/Warn
                     if (isHostile) {
                         ctx.beginPath();
                         ctx.moveTo(cx, cy);
                         ctx.lineTo(cx + b.x, cy + b.y);
                         ctx.strokeStyle = color;
-                        ctx.lineWidth = (threat === 2) ? 3 : 1;
+                        ctx.lineWidth = (threat === 2) ? 2 : 1;
+                        ctx.setLineDash([5, 5]);
                         ctx.stroke();
+                        ctx.setLineDash([]);
                         
                         ctx.strokeStyle = color;
                         ctx.lineWidth = 2;
-                        ctx.strokeRect(cx + b.x - 8, cy + b.y - 8, 16, 16);
+                        ctx.strokeRect(cx + b.x - 6, cy + b.y - 6, 12, 12);
+                        
+                        ctx.font = '10px "Share Tech Mono"';
+                        ctx.fillStyle = color;
+                        ctx.fillText(b.id, cx + b.x + 10, cy + b.y);
+                    } else {
+                        ctx.fillStyle = color;
+                        ctx.fillRect(cx + b.x - 2, cy + b.y - 2, 4, 4);
                     }
-
-                    ctx.fillStyle = color;
-                    ctx.fillRect(cx + b.x - 3, cy + b.y - 3, 6, 6);
                 });
 
-                // 5. Process Player (Mouse)
-                const playerThreat = getThreatLevel(mx, my);
-                if (playerThreat > currentFrameMaxThreat) currentFrameMaxThreat = playerThreat;
+                // Player
+                let playerThreat = 0;
+                
+                if (mouseInCanvas) {
+                    playerThreat = getThreatLevel(mx, my);
+                    if (playerThreat > currentFrameMaxThreat) currentFrameMaxThreat = playerThreat;
 
-                // Update Global State based on MAX threat found in frame
-                globalThreatLevel = currentFrameMaxThreat;
+                    globalThreatLevel = currentFrameMaxThreat;
 
-                // UI Updates
+                    if (playerThreat > 0 && !playerID) {
+                        playerID = "UAS-" + CALLSIGNS[Math.floor(Math.random()*CALLSIGNS.length)];
+                    } else if (playerThreat === 0) {
+                        playerID = null;
+                    }
+
+                    if (playerThreat > 0) {
+                        const pColor = (playerThreat === 2) ? '#ff2a2a' : '#ffcc00';
+                        ctx.beginPath();
+                        ctx.moveTo(cx, cy);
+                        ctx.lineTo(mx, my);
+                        ctx.strokeStyle = pColor;
+                        ctx.lineWidth = (playerThreat === 2) ? 2 : 1;
+                        ctx.stroke();
+
+                        const dx = mx - cx;
+                        const dy = my - cy;
+                        const rng = Math.sqrt(dx*dx + dy*dy);
+                        let az = Math.atan2(dy, dx) * (180/Math.PI);
+                        az = (az + 90 + 360) % 360;
+                        
+                        uiID.innerText = playerID;
+                        uiRng.innerText = rng.toFixed(0) + "m";
+                        uiAz.innerText = az.toFixed(0).padStart(3,0) + "°";
+                        uiX.innerText = dx.toFixed(0);
+                        uiY.innerText = (dy*-1).toFixed(0);
+
+                        playerTrail.push({x: mx, y: my});
+                        if(playerTrail.length > TRAIL_MAX) playerTrail.shift();
+
+                        if(playerTrail.length > 1) {
+                            ctx.beginPath();
+                            ctx.strokeStyle = pColor;
+                            ctx.lineWidth = 2;
+                            playerTrail.forEach((t, i) => i===0 ? ctx.moveTo(t.x, t.y) : ctx.lineTo(t.x, t.y));
+                            ctx.stroke();
+                        }
+
+                        ctx.strokeRect(mx-15, my-15, 30, 30);
+                        ctx.fillStyle = pColor;
+                        ctx.font = 'bold 12px "Share Tech Mono"';
+                        ctx.fillText(playerID, mx+20, my);
+                    } else {
+                        ctx.fillStyle = '#00ff41';
+                        ctx.fillRect(mx-2, my-2, 4, 4);
+                        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(mx, my);
+                        ctx.strokeStyle = 'rgba(0, 255, 65, 0.2)'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
+                        
+                        if(uiID.innerText !== "--") {
+                            uiID.innerText = "--"; uiRng.innerText = "0m";
+                        }
+                    }
+                } else {
+                    globalThreatLevel = currentFrameMaxThreat;
+                }
+
+                // UI Text
                 if (globalThreatLevel === 2) {
                     document.documentElement.style.setProperty('--safe', '#ff2a2a');
                     uiStatus.innerText = "CRITICAL BREACH";
@@ -414,71 +570,12 @@
                     uiClass.className = "t-val";
                 }
 
-                // Player ID Logic
-                if (playerThreat > 0 && !playerID) {
-                     playerID = "UAS-" + CALLSIGNS[Math.floor(Math.random()*CALLSIGNS.length)];
-                } else if (playerThreat === 0) {
-                     playerID = null;
-                }
-
-                // Draw Player Vector
-                if (playerThreat > 0) {
-                    const pColor = (playerThreat === 2) ? '#ff2a2a' : '#ffcc00';
-                    ctx.beginPath();
-                    ctx.moveTo(cx, cy);
-                    ctx.lineTo(mx, my);
-                    ctx.strokeStyle = pColor;
-                    ctx.lineWidth = (playerThreat === 2) ? 3 : 1;
-                    ctx.stroke();
-
-                    // HUD Update
-                    const dx = mx - cx;
-                    const dy = my - cy;
-                    const rng = Math.sqrt(dx*dx + dy*dy);
-                    let az = Math.atan2(dy, dx) * (180/Math.PI);
-                    az = (az + 90 + 360) % 360;
-                    
-                    uiID.innerText = playerID;
-                    uiRng.innerText = rng.toFixed(0) + "m";
-                    uiAz.innerText = az.toFixed(0).padStart(3,0) + "°";
-                    uiX.innerText = dx.toFixed(0);
-                    uiY.innerText = (dy*-1).toFixed(0);
-
-                    playerTrail.push({x: mx, y: my});
-                    if(playerTrail.length > TRAIL_MAX) playerTrail.shift();
-
-                    if(playerTrail.length > 1) {
-                        ctx.beginPath();
-                        ctx.strokeStyle = pColor;
-                        ctx.lineWidth = 2;
-                        playerTrail.forEach((t, i) => i===0 ? ctx.moveTo(t.x, t.y) : ctx.lineTo(t.x, t.y));
-                        ctx.stroke();
-                    }
-
-                    ctx.strokeRect(mx-15, my-15, 30, 30);
-                    ctx.fillStyle = pColor;
-                    ctx.font = 'bold 11px monospace';
-                    ctx.fillText(playerID, mx+20, my);
-                } else {
-                    // Safe mouse
-                    ctx.fillStyle = '#00ff41';
-                    ctx.fillRect(mx-2, my-2, 4, 4);
-                    // Passive dashed vector
-                    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(mx, my);
-                    ctx.strokeStyle = 'rgba(0, 255, 65, 0.2)'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
-                    
-                    if(uiID.innerText !== "--") {
-                        uiID.innerText = "--"; uiRng.innerText = "0m";
-                    }
-                }
-
-                // 6. Red Alert Vignette Strobe (Frame effect at edges)
                 if (globalThreatLevel === 2) {
-                    const flash = Math.sin(Date.now() / 100); // Strobe speed
+                    const flash = Math.sin(Date.now() / 150);
                     if (flash > 0) {
                         const gradient = ctx.createRadialGradient(cx, cy, h*0.3, cx, cy, Math.max(w,h)*0.8);
                         gradient.addColorStop(0, 'rgba(255, 0, 0, 0.0)');
-                        const intensity = 0.3 + (flash * 0.4);
+                        const intensity = 0.2 + (flash * 0.3);
                         gradient.addColorStop(1, `rgba(255, 0, 0, ${intensity})`);
                         ctx.fillStyle = gradient;
                         ctx.fillRect(0, 0, w, h);
