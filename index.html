@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4cThreat | Integrated Airspace Intelligence</title>
+    <title>4cThreat Airspace Intelligence</title>
     <style>
         :root {
             --safe: #00ff41;    /* Monitoring Green */
@@ -150,16 +150,15 @@
         </header>
 
         <div class="hero" id="hero-box">
-            <h1>Statistical Precision & AI</h1>
+            <h1>Commercial-grade Airspace Intelligence</h1>
             <p>
-                <strong>4cThreat</strong> fuses classical signal processing mathematics with advanced AI-driven classification.
-                We combine the reliability of deterministic statistical models with the adaptability of deep learning to provide 
-                unmatched situational awareness and multi-vector threat tracking.
+                <strong>Foresee Threat</strong> fuses statistical precision and AI 
+                for unmatched situational awareness and multi-vector threat tracking.
             </p>
         </div>
 
         <div class="cta-container">
-            <a href="https://www.linkedin.com/company/forgingops" target="_blank" class="btn">Connect on LinkedIn</a>
+            <a href="https://www.linkedin.com/company/4cThreat" target="_blank" class="btn">4cThreat on LinkedIn</a>
         </div>
 
         <div class="hud" id="hud-box">
@@ -397,19 +396,19 @@
                 // UI Updates
                 if (globalThreatLevel === 2) {
                     document.documentElement.style.setProperty('--safe', '#ff2a2a');
-                    uiStatus.innerText = "CRITICAL BREACH DETECTED";
+                    uiStatus.innerText = "CRITICAL BREACH";
                     uiStatus.className = "status-box red-alert";
                     uiClass.innerText = "HOSTILE";
                     uiClass.className = "t-val alert-text";
                 } else if (globalThreatLevel === 1) {
                     document.documentElement.style.setProperty('--safe', '#ffcc00');
-                    uiStatus.innerText = "WARNING: BUFFER ENTRY";
+                    uiStatus.innerText = "BUFFER ENTRY";
                     uiStatus.className = "status-box warning";
                     uiClass.innerText = "SUSPICIOUS";
                     uiClass.className = "t-val warn-text";
                 } else {
                     document.documentElement.style.setProperty('--safe', '#00ff41');
-                    uiStatus.innerText = "PASSIVE MONITORING";
+                    uiStatus.innerText = "SCANNING AIRSPACE";
                     uiStatus.className = "status-box";
                     uiClass.innerText = "ANALYZING";
                     uiClass.className = "t-val";
