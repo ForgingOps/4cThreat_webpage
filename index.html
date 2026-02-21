@@ -147,6 +147,7 @@
         
         .live-text { color: var(--safe); font-weight: bold; }
 
+        /* --- SIMPLE BOUNCING INITIALIZE TEXT --- */
         .scroll-hint {
             position: absolute;
             bottom: 30px;
@@ -271,12 +272,23 @@
         .section-title {
             font-size: 36px;
             color: #fff;
-            margin-bottom: 50px;
+            margin-bottom: 10px; /* Reduced margin for subtitle */
             text-transform: uppercase;
             border-bottom: 1px solid var(--safe);
             display: inline-block;
             padding-bottom: 10px;
             font-family: 'Black Ops One', cursive;
+        }
+
+        .section-subtitle {
+            color: #888;
+            font-size: 16px;
+            margin-bottom: 50px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5;
+            font-family: 'Share Tech Mono', monospace;
         }
 
         /* 2x2 Grid Layout */
@@ -302,7 +314,7 @@
             transition: 0.3s;
             position: relative;
             overflow: hidden;
-            width: 100%; /* Fill Grid Cell */
+            width: 100%;
             box-sizing: border-box;
         }
         .team-card:hover {
@@ -310,7 +322,7 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
-        /* Tactical Markers */
+        
         .team-card::before { content: ''; position: absolute; top: 0; left: 0; width: 10px; height: 10px; border-top: 2px solid var(--safe); border-left: 2px solid var(--safe); }
         .team-card::after { content: ''; position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; border-bottom: 2px solid var(--safe); border-right: 2px solid var(--safe); }
 
@@ -456,11 +468,15 @@
     </section>
 
     <section class="team-section">
-        <div class="section-title">Mission Command</div>
+        <div class="section-title">Operations Directorate</div>
+        <p class="section-subtitle">
+            A unified command to deliver mission-critical intelligence. 
+            Decades of hands-on overlapping expertise in Sensors, Edge AI, and Hardware Architecture. 
+        </p>
         
         <div class="team-grid">
             <div class="team-card">
-                <div class="role-badge">Founder & Lead Architect</div>
+                <div class="role-badge">Lead Architect & Director</div>
                 <h3 class="member-name">Hara Madhav Talasila<span class="degree">, PhD</span></h3>
                 <div class="member-contact">
                     <a href="mailto:hara@4cThreat.com" class="member-email">hara@4cThreat.com</a>
@@ -469,7 +485,7 @@
             </div>
 
             <div class="team-card">
-                <div class="role-badge">Principal Engineer (Radar/AI)</div>
+                <div class="role-badge">Lead Scientist - AI & Vision</div>
                 <h3 class="member-name">Soumyaroop Nandi<span class="degree">, PhD</span></h3>
                 <div class="member-contact">
                     <a href="mailto:nandi@4cThreat.com" class="member-email">nandi@4cThreat.com</a>
@@ -478,19 +494,19 @@
             </div>
 
             <div class="team-card">
-                <div class="role-badge">Principal Engineer (Sensor Fusion)</div>
+                <div class="role-badge">Co-Founder & Hardware Lead</div>
                 <h3 class="member-name">Syed Faiz Ahmed</h3>
                 <div class="member-contact">
                     <a href="mailto:faiz@4cThreat.com" class="member-email">faiz@4cThreat.com</a>
-                    </div>
+                </div>
             </div>
 
              <div class="team-card">
-                <div class="role-badge">Principal Engineer (Embedded)</div>
+                <div class="role-badge">Data Systems Lead</div>
                 <h3 class="member-name">Akhilesh Mishra</h3>
                 <div class="member-contact">
                     <a href="mailto:akhilesh@4cThreat.com" class="member-email">akhilesh@4cThreat.com</a>
-                    </div>
+                </div>
             </div>
         </div>
     </section>
