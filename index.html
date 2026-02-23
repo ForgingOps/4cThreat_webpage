@@ -634,7 +634,7 @@
 
                 <header class="system-header">
                     <div class="mini-logo">
-                        GrandView Sentinel 2026_02_23 / SYS_ACTIVE
+                        Grand Sentinel 2026_02_23 / SYS_ACTIVE
                         <span class="time-text" id="sys-time">[ 00:00:00 ]</span>
                     </div>
 
@@ -914,10 +914,10 @@
 
                 const sysHeader = document.querySelector('.mini-logo');
                 if (isSystemOffline) {
-                    sysHeader.innerHTML = `GrandView Sentinel 2026_02_23 / <span style="color:var(--alert)">SYS_OFFLINE</span> <span class="time-text">[ ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} ]</span>`;
+                    sysHeader.innerHTML = `Grand Sentinel 2026_02_23 / <span style="color:var(--alert)">SYS_OFFLINE</span> <span class="time-text">[ ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} ]</span>`;
                     sensorPanel.classList.add('panel-alert');
                 } else {
-                    sysHeader.innerHTML = `GrandView Sentinel 2026_02_23 / SYS_ACTIVE <span class="time-text">[ ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} ]</span>`;
+                    sysHeader.innerHTML = `Grand Sentinel 2026_02_23 / SYS_ACTIVE <span class="time-text">[ ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} ]</span>`;
                     sensorPanel.classList.remove('panel-alert');
                 }
 
