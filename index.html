@@ -622,7 +622,7 @@
 
                 <header class="system-header">
                     <div class="mini-logo">
-                        4cT_JayHawk_1587 / SYS_ACTIVE
+                        GrandView Sentinel 2026_02_23 / SYS_ACTIVE
                         <span class="time-text" id="sys-time">[ 00:00:00 ]</span>
                     </div>
 
@@ -901,9 +901,9 @@
 
                 const sysHeader = document.querySelector('.mini-logo');
                 if (isSystemOffline) {
-                    sysHeader.innerHTML = `4cT_JayHawk_1587 / <span style="color:var(--alert)">SYS_OFFLINE</span> <span class="time-text">[ ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} ]</span>`;
+                    sysHeader.innerHTML = `GrandView Sentinel 2026_02_23 / <span style="color:var(--alert)">SYS_OFFLINE</span> <span class="time-text">[ ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} ]</span>`;
                 } else {
-                    sysHeader.innerHTML = `4cT_JayHawk_1587 / SYS_ACTIVE <span class="time-text">[ ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} ]</span>`;
+                    sysHeader.innerHTML = `GrandView Sentinel 2026_02_23 / SYS_ACTIVE <span class="time-text">[ ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} ]</span>`;
                 }
 
                 ctx.fillStyle = '#0b0b0e'; ctx.fillRect(0, 0, w, h);
@@ -1003,9 +1003,39 @@
                     uiAz.innerText = az.toFixed(0).padStart(3,0) + "°";
                     uiX.innerText = dx.toFixed(0); uiY.innerText = (dy*-1).toFixed(0);
 
+                    // 1. UPDATE TRAIL (HISTORY)
+                    playerTrail.push({x: mx, y: my});
+                    if (playerTrail.length > TRAIL_MAX) playerTrail.shift();
+
+                    // 2. DRAW TRAIL
+                    if (playerTrail.length > 1) {
+                        ctx.beginPath();
+                        playerTrail.forEach((t, i) => {
+                            if (i === 0) ctx.moveTo(t.x, t.y);
+                            else ctx.lineTo(t.x, t.y);
+                        });
+                        ctx.strokeStyle = pColor;
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([]); // Solid line for trail
+                        ctx.stroke();
+                    }
+
+                    // 3. DRAW TRACKING LINE (Center to Cursor)
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy);
+                    ctx.lineTo(mx, my);
+                    ctx.strokeStyle = pColor; 
+                    ctx.lineWidth = 1; 
+                    ctx.setLineDash([5, 5]); // Dashed line
+                    ctx.stroke();
+                    ctx.setLineDash([]); // Reset
+
+                    // 4. DRAW CURSOR ICON
                     ctx.strokeStyle = pColor; ctx.lineWidth = 2; ctx.beginPath();
                     ctx.moveTo(mx, my-8); ctx.lineTo(mx+7, my+8); ctx.lineTo(mx-7, my+8); ctx.closePath(); ctx.stroke();
                 } else {
+                     // Clear trail if mouse leaves or offline
+                     if (!mouseInCanvas || isSystemOffline) playerTrail = [];
                      globalThreatLevel = currentFrameMaxThreat;
                 }
 
