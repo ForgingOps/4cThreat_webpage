@@ -176,6 +176,49 @@
             40% {transform: translateX(-50%) translateY(-10px);}
             60% {transform: translateX(-50%) translateY(-5px);}
         }
+        
+        /* Wrapper to keep YRKM and Header at the top together */
+        .top-ui-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            pointer-events: auto;
+        }
+
+        /* YRKM MONITOR */
+        .yrkm-monitor-box {
+           /* CHANGE THIS CODE TO TRY DIFFERENT COLORS */
+            --yrkm-color: #E0E0E0; 
+
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);      /* Darker background for contrast */
+            border: 1px solid var(--yrkm-color); 
+            border-left: 4px solid var(--yrkm-color); 
+            border-right: 4px solid var(--yrkm-color); 
+            padding: 12px 0;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+            margin-bottom: 5px;
+        }
+
+        .yrkm-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 18px;
+            color: var(--yrkm-color);            /* Uses the variable above */
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--yrkm-color); /* Glow matches the color */
+            text-align: center;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .yrkm-text { font-size: 14px; letter-spacing: 1px; }
+        }
 
         /* --- SECTION 2: LIVE SYSTEM --- */
         .system-section {
@@ -432,18 +475,26 @@
         <canvas id="c"></canvas>
 
         <div class="ui-layer">
-            <header class="system-header">
-                <div class="mini-logo">
-                    <span class="live-text">SYS_ACTIVE // </span> JayHawk_USA 1776_07_04
-                    <span class="time-text" id="sys-time">[ 00:00:00 ]</span>
+            
+            <div class="top-ui-group">
+
+                <div class="yrkm-monitor-box">
+                    <div class="yrkm-text">YRKM: YELLOW RED KINETIC MONITOR</div>
                 </div>
-                
-                <div id="status" class="status-box">PASSIVE MONITORING</div>
-            </header>
+
+                <header class="system-header">
+                    <div class="mini-logo">
+                        <span class="live-text">SYS_ACTIVE // </span> JayHawk_USA 1776_07_04
+                        <span class="time-text" id="sys-time">[ 00:00:00 ]</span>
+                    </div>
+
+                    <div id="status" class="status-box">PASSIVE MONITORING</div>
+                </header>
+            </div>
 
             <div class="hud" id="hud-box">
                 <div class="hud-section">
-                    <span class="hud-title">Target Telemetry (Cursor)</span>
+                    <span class="hud-title">Target Telemetry (CURSOR ONLY)</span>
                     <div class="telemetry-grid">
                         <div class="t-box"><span class="t-label">SIGNATURE ID</span><span class="t-val" id="val-id">--</span></div>
                         <div class="t-box"><span class="t-label">ASSESSMENT</span><span class="t-val" id="val-class">ANALYZING</span></div>
