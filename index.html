@@ -2,9 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>4cThreat Airspace Intelligence</title>
     
+    <meta property="og:title" content="4cThreat | Airspace Intelligence">
+    <meta property="og:description" content="Commercial-grade sensor fusion and asymmetric threat detection architecture. Overland Park, KS.">
+    <meta property="og:image" content="preview_red.jpg">
+    <meta property="og:url" content="https://4cthreat.com">
+    <meta name="twitter:card" content="summary_large_image">
+
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><circle cx=%2232%22 cy=%2232%22 r=%2228%22 stroke=%22%2300ff41%22 stroke-width=%224%22 fill=%22none%22/><path d=%22M32 4v56M4 32h56%22 stroke=%22%2300ff41%22 stroke-width=%224%22/><circle cx=%2232%22 cy=%2232%22 r=%228%22 fill=%22%2300ff41%22/></svg>">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -254,6 +260,7 @@
             align-items: center;
             backdrop-filter: blur(4px);
             margin-bottom: 5px;
+            animation: monitorPulse 4s infinite ease-in-out;
         }
 
         .yrkm-text {
@@ -270,6 +277,13 @@
         @media (max-width: 768px) {
             .yrkm-text { font-size: 14px; letter-spacing: 1px; }
         }
+
+        @keyframes monitorPulse {
+            0% { box-shadow: 0 0 5px rgba(224, 224, 224, 0.1); border-color: rgba(224, 224, 224, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(224, 224, 224, 0.3); border-color: rgba(224, 224, 224, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(224, 224, 224, 0.1); border-color: rgba(224, 224, 224, 0.3); }
+        }
+
 
         /* --- SECTION 2: LIVE SYSTEM --- */
         .system-section {
@@ -357,6 +371,74 @@
         .t-val { display: block; font-size: 18px; color: #fff; margin-top: 2px; text-shadow: 0 0 5px rgba(255,255,255,0.2); }
         .alert-text { color: var(--alert) !important; text-shadow: 0 0 8px var(--alert); }
         .warn-text { color: var(--warn) !important; }
+
+        /* SENSOR CONTROL PANEL (Granular) */
+        .sensor-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 260px;
+            background: rgba(10, 10, 15, 0.9);
+            border: 1px solid #333;
+            border-left: 2px solid var(--safe);
+            padding: 15px;
+            pointer-events: auto;
+            backdrop-filter: blur(4px);
+        }
+
+        .sensor-title {
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            font-weight: bold;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            justify-content: space-between;
+        }
+
+        .toggle-label {
+            font-size: 12px;
+            color: #ccc;
+            font-family: 'Share Tech Mono';
+            width: 80px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 4px;
+        }
+
+        .sq-btn {
+            background: transparent;
+            border: 1px solid #555;
+            color: #555;
+            width: 24px;
+            height: 24px;
+            font-family: 'Share Tech Mono';
+            cursor: pointer;
+            font-size: 10px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sq-btn.active {
+            border-color: var(--safe);
+            background: rgba(0, 255, 65, 0.2);
+            color: var(--safe);
+            box-shadow: 0 0 5px rgba(0, 255, 65, 0.2);
+        }
+
+        .sq-btn:hover { border-color: #fff; color: #fff; }
 
         /* --- SECTION 3: TEAM (GRID LAYOUT) --- */
         .team-section {
@@ -548,6 +630,37 @@
                 </header>
             </div>
 
+            <div class="sensor-controls">
+                <div class="sensor-title">SENSOR ARRAY CONTROL</div>
+                
+                <div class="toggle-row">
+                    <span class="toggle-label">HQ PRIME</span>
+                    <div class="btn-group">
+                        <button class="sq-btn active" onclick="toggleSensor('hq', 0, this)">1</button>
+                    </div>
+                </div>
+                
+                <div class="toggle-row">
+                    <span class="toggle-label">ASSET A</span>
+                    <div class="btn-group">
+                        <button class="sq-btn active" onclick="toggleSensor('asset', 0, this)">1</button>
+                        <button class="sq-btn active" onclick="toggleSensor('asset', 1, this)">2</button>
+                        <button class="sq-btn active" onclick="toggleSensor('asset', 2, this)">3</button>
+                        <button class="sq-btn active" onclick="toggleSensor('asset', 3, this)">4</button>
+                    </div>
+                </div>
+
+                <div class="toggle-row">
+                    <span class="toggle-label">CORRIDOR 7</span>
+                    <div class="btn-group">
+                        <button class="sq-btn active" onclick="toggleSensor('corridor', 0, this)">1</button>
+                        <button class="sq-btn active" onclick="toggleSensor('corridor', 1, this)">2</button>
+                        <button class="sq-btn active" onclick="toggleSensor('corridor', 2, this)">3</button>
+                        <button class="sq-btn active" onclick="toggleSensor('corridor', 3, this)">4</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="hud" id="hud-box">
                 <div class="hud-section">
                     <span class="hud-title">Target Telemetry (CURSOR ONLY)</span>
@@ -659,6 +772,25 @@
     </footer>
 
     <script>
+
+        // GLOBAL SENSOR STATE
+        const sensorStates = {
+            hq: true,
+            asset: true,
+            corridor: true
+        };
+
+        function toggleSensor(group, btn) {
+            sensorStates[group] = !sensorStates[group];
+            if (sensorStates[group]) {
+                btn.classList.add('active');
+                btn.innerText = "ONLINE";
+            } else {
+                btn.classList.remove('active');
+                btn.innerText = "OFFLINE";
+            }
+        }
+
         window.addEventListener('load', function() {
             
             const container = document.getElementById('sys-container');
@@ -677,6 +809,7 @@
             let w, h, cx, cy;
             let mx = 0, my = 0; 
             let mouseInCanvas = false;
+            let pulseRad = 0; // REPLACES scanAngle
 
             // Config
             const BUFFER_SIZE = 70; 
@@ -719,6 +852,21 @@
             canvas.addEventListener('mouseleave', () => {
                 mouseInCanvas = false;
             });
+
+            // ADD TOUCH SUPPORT FOR MOBILE USERS
+            canvas.addEventListener('touchstart', handleTouch, {passive: false});
+            canvas.addEventListener('touchmove', handleTouch, {passive: false});
+            canvas.addEventListener('touchend', () => { mouseInCanvas = false; });
+
+            function handleTouch(e) {
+                e.preventDefault(); // Prevent scrolling while interacting with radar
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                mx = touch.clientX - rect.left;
+                my = touch.clientY - rect.top;
+                mouseInCanvas = true;
+            }
+
 
             // Init Bots (Mixed Types)
             for(let i=0; i<NUM_BOTS; i++) {
@@ -793,6 +941,56 @@
 
                 ctx.fillStyle = '#0b0b0e'; 
                 ctx.fillRect(0, 0, w, h);
+
+                // --- SENSOR PULSE EFFECT (HQ, ASSET, CORRIDOR) ---
+                pulseRad += 1.5; 
+                const maxPulse = 300;
+                if(pulseRad > maxPulse) pulseRad = 0;
+
+                // Sensor Locations (Corners of Zones + HQ Center)
+                // --- SENSOR STATE LOGIC ---
+                // 1. Define Sensors with Groups
+                const sensorData = [
+                    {group: 'hq', x: 0, y: 0}, 
+                    
+                    // Asset A Corners
+                    {group: 'asset', x: 250, y: -200},
+                    {group: 'asset', x: 500, y: -200},
+                    {group: 'asset', x: 500, y: -20},
+                    {group: 'asset', x: 250, y: -20},
+
+                    // Corridor 7 Corners
+                    {group: 'corridor', x: -450, y: 180},
+                    {group: 'corridor', x: -200, y: 180},
+                    {group: 'corridor', x: -150, y: 300},
+                    {group: 'corridor', x: -500, y: 300}
+                ];
+
+                // 2. Draw Loop Integration
+                sensorData.forEach(p => {
+                    // Check Global State (defined below)
+                    if (!sensorStates[p.group]) return; 
+
+                    // Draw Sensor Node (Anchor)
+                    ctx.fillStyle = 'rgba(0, 229, 255, 0.8)';
+                    ctx.fillRect(cx + p.x - 2, cy + p.y - 2, 4, 4);
+
+                    // Draw Primary Pulse
+                    ctx.beginPath();
+                    ctx.arc(cx + p.x, cy + p.y, pulseRad, 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(0, 229, 255, ${0.4 * (1 - pulseRad/maxPulse)})`; 
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+
+                    // Draw Secondary Pulse
+                    let r2 = (pulseRad + 100) % maxPulse;
+                    ctx.beginPath();
+                    ctx.arc(cx + p.x, cy + p.y, r2, 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(0, 229, 255, ${0.2 * (1 - r2/maxPulse)})`; 
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                });
+
 
                 // Grid
                 ctx.lineWidth = 1;
