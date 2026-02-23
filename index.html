@@ -280,7 +280,7 @@
 
         @keyframes monitorPulse {
             0% { box-shadow: 0 0 5px rgba(224, 224, 224, 0.1); border-color: rgba(224, 224, 224, 0.3); }
-            50% { box-shadow: 0 0 15px rgba(224, 224, 224, 0.3); border-color: rgba(224, 224, 224, 0.8); }
+            50% { box-shadow: 0 0 20px rgba(224, 224, 224, 0.4); border-color: rgba(224, 224, 224, 0.9); }
             100% { box-shadow: 0 0 5px rgba(224, 224, 224, 0.1); border-color: rgba(224, 224, 224, 0.3); }
         }
 
@@ -622,7 +622,7 @@
 
                 <header class="system-header">
                     <div class="mini-logo">
-                        <span class="live-text">SYS_ACTIVE // </span> JayHawk_USA 1776_07_04
+                        4cT_JayHawk_1587 / SYS_ACTIVE
                         <span class="time-text" id="sys-time">[ 00:00:00 ]</span>
                     </div>
 
@@ -772,24 +772,22 @@
     </footer>
 
     <script>
-
-        // GLOBAL SENSOR STATE
-        const sensorStates = {
-            hq: true,
-            asset: true,
-            corridor: true
+        // GLOBAL SENSOR STATE (True = On)
+        const sensorState = {
+            hq: [true],
+            asset: [true, true, true, true],
+            corridor: [true, true, true, true]
         };
 
-        function toggleSensor(group, btn) {
-            sensorStates[group] = !sensorStates[group];
-            if (sensorStates[group]) {
+        // Toggle Function for Individual Buttons
+        window.toggleSensor = function(group, index, btn) {
+            sensorState[group][index] = !sensorState[group][index];
+            if (sensorState[group][index]) {
                 btn.classList.add('active');
-                btn.innerText = "ONLINE";
             } else {
                 btn.classList.remove('active');
-                btn.innerText = "OFFLINE";
             }
-        }
+        };
 
         window.addEventListener('load', function() {
             
@@ -809,9 +807,8 @@
             let w, h, cx, cy;
             let mx = 0, my = 0; 
             let mouseInCanvas = false;
-            let pulseRad = 0; // REPLACES scanAngle
+            let pulseRad = 0;
 
-            // Config
             const BUFFER_SIZE = 70; 
             const TRAIL_MAX = 25; 
             const CALLSIGNS = ["ALPHA", "BRAVO", "CHARLIE", "DELTA", "ECHO", "SIERRA", "TANGO", "ZULU"];
@@ -823,6 +820,21 @@
                 { name: "CORRIDOR_7", type: "poly", points: [{x:-450, y:180}, {x:-200, y:180}, {x:-150, y:300}, {x:-500, y:300}] }
             ];
 
+            // SENSOR COORDINATES (Granular)
+            const sensorCoords = [
+                {group: 'hq', idx: 0, x: 0, y: 0},
+                // Asset A Corners
+                {group: 'asset', idx: 0, x: 250, y: -200},
+                {group: 'asset', idx: 1, x: 500, y: -200},
+                {group: 'asset', idx: 2, x: 500, y: -20},
+                {group: 'asset', idx: 3, x: 250, y: -20},
+                // Corridor 7 Corners
+                {group: 'corridor', idx: 0, x: -450, y: 180},
+                {group: 'corridor', idx: 1, x: -200, y: 180},
+                {group: 'corridor', idx: 2, x: -150, y: 300},
+                {group: 'corridor', idx: 3, x: -500, y: 300}
+            ];
+
             const bots = [];
             const NUM_BOTS = 12;
 
@@ -830,7 +842,6 @@
             let playerTrail = [];
             let globalThreatLevel = 0; 
 
-            // --- INIT ---
             function resize() {
                 w = container.clientWidth;
                 h = container.clientHeight;
@@ -842,326 +853,172 @@
             window.addEventListener('resize', resize);
             resize();
 
-            // Track mouse relative to CANVAS
-            canvas.addEventListener('mousemove', e => {
-                mx = e.offsetX;
-                my = e.offsetY;
-                mouseInCanvas = true;
-            });
-            
-            canvas.addEventListener('mouseleave', () => {
-                mouseInCanvas = false;
-            });
-
-            // ADD TOUCH SUPPORT FOR MOBILE USERS
+            canvas.addEventListener('mousemove', e => { mx = e.offsetX; my = e.offsetY; mouseInCanvas = true; });
+            canvas.addEventListener('mouseleave', () => { mouseInCanvas = false; });
             canvas.addEventListener('touchstart', handleTouch, {passive: false});
             canvas.addEventListener('touchmove', handleTouch, {passive: false});
             canvas.addEventListener('touchend', () => { mouseInCanvas = false; });
+            function handleTouch(e) { e.preventDefault(); const rect = canvas.getBoundingClientRect(); const touch = e.touches[0]; mx = touch.clientX - rect.left; my = touch.clientY - rect.top; mouseInCanvas = true; }
 
-            function handleTouch(e) {
-                e.preventDefault(); // Prevent scrolling while interacting with radar
-                const rect = canvas.getBoundingClientRect();
-                const touch = e.touches[0];
-                mx = touch.clientX - rect.left;
-                my = touch.clientY - rect.top;
-                mouseInCanvas = true;
-            }
-
-
-            // Init Bots (Mixed Types)
             for(let i=0; i<NUM_BOTS; i++) {
-                // Determine Type
                 let type = (Math.random() > 0.5) ? 'QUAD' : 'OCTO';
-                let isLoiter = (i === 0); // First bot is a Loiterer
-                
+                let isLoiter = (i === 0);
                 bots.push({
-                    x: (Math.random() - 0.5) * w * 0.9, 
-                    y: (Math.random() - 0.5) * h * 0.9,
-                    vx: isLoiter ? 0 : (Math.random() - 0.5) * 2,
-                    vy: isLoiter ? 0 : (Math.random() - 0.5) * 2,
-                    type: type,
-                    isLoiter: isLoiter,
-                    loiterAngle: 0,
-                    id: isLoiter ? "LOITER_42" : "UAV-" + Math.floor(Math.random()*900+100),
-                    trail: []
+                    x: (Math.random() - 0.5) * w * 0.9, y: (Math.random() - 0.5) * h * 0.9,
+                    vx: isLoiter ? 0 : (Math.random() - 0.5) * 2, vy: isLoiter ? 0 : (Math.random() - 0.5) * 2,
+                    type: type, isLoiter: isLoiter, loiterAngle: 0,
+                    id: isLoiter ? "LOITER_42" : "UAV-" + Math.floor(Math.random()*900+100), trail: []
                 });
             }
 
-            // --- THREAT LOGIC ---
             function getThreatLevel(tx, ty) {
                 let maxThreat = 0;
                 zones.forEach(z => {
                     ctx.beginPath();
                     if(z.type === 'circle') ctx.arc(cx + z.x, cy + z.y, z.r, 0, Math.PI*2);
                     else if(z.type === 'rect') ctx.rect(cx + z.x, cy + z.y, z.w, z.h);
-                    else if(z.type === 'poly') {
-                        ctx.moveTo(cx + z.points[0].x, cy + z.points[0].y);
-                        z.points.forEach(p => ctx.lineTo(cx + p.x, cy + p.y));
-                        ctx.closePath();
-                    }
-
-                    if(ctx.isPointInPath(tx, ty)) {
-                        maxThreat = 2; // Critical
-                        return;
-                    }
-                    if (maxThreat < 1) {
-                        ctx.lineWidth = BUFFER_SIZE * 2;
-                        if (ctx.isPointInStroke(tx, ty)) maxThreat = 1; // Warning
-                    }
+                    else if(z.type === 'poly') { ctx.moveTo(cx + z.points[0].x, cy + z.points[0].y); z.points.forEach(p => ctx.lineTo(cx + p.x, cy + p.y)); ctx.closePath(); }
+                    
+                    if(ctx.isPointInPath(tx, ty)) { maxThreat = 2; return; }
+                    if (maxThreat < 1) { ctx.lineWidth = BUFFER_SIZE * 2; if (ctx.isPointInStroke(tx, ty)) maxThreat = 1; }
                 });
                 return maxThreat;
             }
 
-            // --- DRAW DRONE SHAPES ---
             function drawDrone(ctx, x, y, color, type) {
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                
-                if (type === 'QUAD') {
-                    // X Shape
-                    ctx.moveTo(x-5, y-5); ctx.lineTo(x+5, y+5);
-                    ctx.moveTo(x+5, y-5); ctx.lineTo(x-5, y+5);
-                    ctx.stroke();
-                    ctx.strokeRect(x-2, y-2, 4, 4);
-                } else {
-                    // Octo Shape (Circle with lines)
-                    ctx.arc(x, y, 4, 0, Math.PI*2);
-                    ctx.moveTo(x, y-6); ctx.lineTo(x, y+6);
-                    ctx.moveTo(x-6, y); ctx.lineTo(x+6, y);
-                    ctx.stroke();
-                }
+                ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath();
+                if (type === 'QUAD') { ctx.moveTo(x-5, y-5); ctx.lineTo(x+5, y+5); ctx.moveTo(x+5, y-5); ctx.lineTo(x-5, y+5); ctx.stroke(); ctx.strokeRect(x-2, y-2, 4, 4); } 
+                else { ctx.arc(x, y, 4, 0, Math.PI*2); ctx.moveTo(x, y-6); ctx.lineTo(x, y+6); ctx.moveTo(x-6, y); ctx.lineTo(x+6, y); ctx.stroke(); }
             }
 
-            // --- LOOP ---
             function draw() {
-                // Update Time
                 const now = new Date();
-                uiTime.innerText = `[ ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} ]`;
+                
+                // 1. CHECK SYSTEM STATUS
+                let activeSensorCount = 0;
+                Object.values(sensorState).forEach(arr => arr.forEach(s => { if(s) activeSensorCount++ }));
+                const isSystemOffline = (activeSensorCount === 0);
 
-                ctx.fillStyle = '#0b0b0e'; 
-                ctx.fillRect(0, 0, w, h);
+                const sysHeader = document.querySelector('.mini-logo');
+                if (isSystemOffline) {
+                    sysHeader.innerHTML = `4cT_JayHawk_1587 / <span style="color:var(--alert)">SYS_OFFLINE</span> <span class="time-text">[ ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} ]</span>`;
+                } else {
+                    sysHeader.innerHTML = `4cT_JayHawk_1587 / SYS_ACTIVE <span class="time-text">[ ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} ]</span>`;
+                }
 
-                // --- SENSOR PULSE EFFECT (HQ, ASSET, CORRIDOR) ---
-                pulseRad += 1.5; 
-                const maxPulse = 300;
-                if(pulseRad > maxPulse) pulseRad = 0;
-
-                // Sensor Locations (Corners of Zones + HQ Center)
-                // --- SENSOR STATE LOGIC ---
-                // 1. Define Sensors with Groups
-                const sensorData = [
-                    {group: 'hq', x: 0, y: 0}, 
-                    
-                    // Asset A Corners
-                    {group: 'asset', x: 250, y: -200},
-                    {group: 'asset', x: 500, y: -200},
-                    {group: 'asset', x: 500, y: -20},
-                    {group: 'asset', x: 250, y: -20},
-
-                    // Corridor 7 Corners
-                    {group: 'corridor', x: -450, y: 180},
-                    {group: 'corridor', x: -200, y: 180},
-                    {group: 'corridor', x: -150, y: 300},
-                    {group: 'corridor', x: -500, y: 300}
-                ];
-
-                // 2. Draw Loop Integration
-                sensorData.forEach(p => {
-                    // Check Global State (defined below)
-                    if (!sensorStates[p.group]) return; 
-
-                    // Draw Sensor Node (Anchor)
-                    ctx.fillStyle = 'rgba(0, 229, 255, 0.8)';
-                    ctx.fillRect(cx + p.x - 2, cy + p.y - 2, 4, 4);
-
-                    // Draw Primary Pulse
-                    ctx.beginPath();
-                    ctx.arc(cx + p.x, cy + p.y, pulseRad, 0, Math.PI * 2);
-                    ctx.strokeStyle = `rgba(0, 229, 255, ${0.4 * (1 - pulseRad/maxPulse)})`; 
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-
-                    // Draw Secondary Pulse
-                    let r2 = (pulseRad + 100) % maxPulse;
-                    ctx.beginPath();
-                    ctx.arc(cx + p.x, cy + p.y, r2, 0, Math.PI * 2);
-                    ctx.strokeStyle = `rgba(0, 229, 255, ${0.2 * (1 - r2/maxPulse)})`; 
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                });
-
+                ctx.fillStyle = '#0b0b0e'; ctx.fillRect(0, 0, w, h);
 
                 // Grid
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-                ctx.beginPath();
+                ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255,255,255,0.03)'; ctx.beginPath();
                 for(let x=0; x<w; x+=40) { ctx.moveTo(x,0); ctx.lineTo(x,h); }
                 for(let y=0; y<h; y+=40) { ctx.moveTo(0,y); ctx.lineTo(w,y); }
                 ctx.stroke();
-
-                ctx.strokeStyle = 'rgba(0, 255, 65, 0.08)';
-                ctx.beginPath();
-                for(let x=0; x<w; x+=200) { ctx.moveTo(x,0); ctx.lineTo(x,h); }
-                for(let y=0; y<h; y+=200) { ctx.moveTo(0,y); ctx.lineTo(w,y); }
-                ctx.stroke();
-
-                let currentFrameMaxThreat = 0;
 
                 // Zones
                 zones.forEach(z => {
                     ctx.beginPath();
                     if(z.type === 'circle') ctx.arc(cx + z.x, cy + z.y, z.r, 0, Math.PI*2);
                     else if(z.type === 'rect') ctx.rect(cx + z.x, cy + z.y, z.w, z.h);
-                    else if(z.type === 'poly') {
-                        ctx.moveTo(cx + z.points[0].x, cy + z.points[0].y);
-                        z.points.forEach(p => ctx.lineTo(cx + p.x, cy + p.y));
-                        ctx.closePath();
-                    }
-
-                    ctx.lineJoin = "round";
-                    ctx.lineWidth = BUFFER_SIZE * 2;
-                    ctx.strokeStyle = 'rgba(255, 204, 0, 0.05)'; 
-                    ctx.stroke();
-
-                    ctx.fillStyle = (globalThreatLevel === 2) ? 'rgba(255, 42, 42, 0.2)' : 'rgba(0, 255, 65, 0.05)';
-                    ctx.strokeStyle = (globalThreatLevel === 2) ? '#ff2a2a' : '#00ff41';
-                    ctx.lineWidth = 2;
-                    ctx.fill();
-                    ctx.stroke();
-
-                    ctx.fillStyle = (globalThreatLevel === 2) ? '#ff2a2a' : '#555';
-                    ctx.font = '12px "Black Ops One", cursive';
+                    else if(z.type === 'poly') { ctx.moveTo(cx + z.points[0].x, cy + z.points[0].y); z.points.forEach(p => ctx.lineTo(cx + p.x, cy + p.y)); ctx.closePath(); }
+                    
+                    ctx.lineJoin = "round"; ctx.lineWidth = BUFFER_SIZE * 2; ctx.strokeStyle = 'rgba(255, 204, 0, 0.05)'; ctx.stroke();
+                    ctx.fillStyle = (globalThreatLevel === 2 && !isSystemOffline) ? 'rgba(255, 42, 42, 0.2)' : 'rgba(0, 255, 65, 0.05)';
+                    ctx.strokeStyle = (globalThreatLevel === 2 && !isSystemOffline) ? '#ff2a2a' : '#00ff41';
+                    ctx.lineWidth = 2; ctx.fill(); ctx.stroke();
+                    
+                    ctx.fillStyle = '#555'; ctx.font = '12px "Black Ops One", cursive';
                     let lx = (z.type === 'circle') ? z.x : (z.type === 'rect' ? z.x : z.points[0].x);
                     let ly = (z.type === 'circle') ? z.y : (z.type === 'rect' ? z.y : z.points[0].y);
                     ctx.fillText(z.name, cx + lx, cy + ly);
                 });
 
-                // Bots
+                // DRAW SENSORS (Only if Active)
+                pulseRad += 1.5; const maxPulse = 300; if(pulseRad > maxPulse) pulseRad = 0;
+                
+                sensorCoords.forEach(p => {
+                    if (!sensorState[p.group][p.idx]) return; 
+
+                    ctx.fillStyle = 'rgba(0, 229, 255, 0.8)';
+                    ctx.fillRect(cx + p.x - 2, cy + p.y - 2, 4, 4);
+
+                    ctx.beginPath(); ctx.arc(cx + p.x, cy + p.y, pulseRad, 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(0, 229, 255, ${0.4 * (1 - pulseRad/maxPulse)})`; 
+                    ctx.lineWidth = 1; ctx.stroke();
+                });
+
+                let currentFrameMaxThreat = 0;
+
+                // BOTS
                 bots.forEach(b => {
-                    if (b.isLoiter) {
-                        b.loiterAngle += 0.01;
-                        b.x = -250 + Math.cos(b.loiterAngle) * 60;
-                        b.y = -250 + Math.sin(b.loiterAngle) * 60;
-                    } else {
-                        b.x += b.vx; b.y += b.vy;
-                        if(Math.abs(b.x) > w/2) b.vx *= -1;
-                        if(Math.abs(b.y) > h/2) b.vy *= -1;
+                    if (b.isLoiter) { b.loiterAngle += 0.01; b.x = -250 + Math.cos(b.loiterAngle) * 60; b.y = -250 + Math.sin(b.loiterAngle) * 60; } 
+                    else { b.x += b.vx; b.y += b.vy; if(Math.abs(b.x) > w/2) b.vx *= -1; if(Math.abs(b.y) > h/2) b.vy *= -1; }
+
+                    let threat = 0;
+                    if (!isSystemOffline) {
+                        threat = getThreatLevel(cx + b.x, cy + b.y);
+                        if (threat > currentFrameMaxThreat) currentFrameMaxThreat = threat;
                     }
 
-                    const threat = getThreatLevel(cx + b.x, cy + b.y);
-                    if (threat > currentFrameMaxThreat) currentFrameMaxThreat = threat;
-
                     const isHostile = (threat >= 1);
-                    const color = (threat === 2) ? '#ff2a2a' : (threat === 1 ? '#ffcc00' : '#00ff41');
+                    const color = isSystemOffline ? '#444' : ((threat === 2) ? '#ff2a2a' : (threat === 1 ? '#ffcc00' : '#00ff41'));
                     
-                    b.trail.push({x: b.x, y: b.y});
-                    if(b.trail.length > TRAIL_MAX) b.trail.shift();
+                    b.trail.push({x: b.x, y: b.y}); if(b.trail.length > TRAIL_MAX) b.trail.shift();
 
-                    if(b.trail.length > 1) {
-                        ctx.beginPath();
-                        b.trail.forEach((t, i) => i===0 ? ctx.moveTo(cx+t.x, cy+t.y) : ctx.lineTo(cx+t.x, cy+t.y));
-                        ctx.strokeStyle = color;
-                        ctx.lineWidth = 1;
-                        ctx.stroke();
+                    if(!isSystemOffline && b.trail.length > 1) {
+                        ctx.beginPath(); b.trail.forEach((t, i) => i===0 ? ctx.moveTo(cx+t.x, cy+t.y) : ctx.lineTo(cx+t.x, cy+t.y));
+                        ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.stroke();
                     }
 
                     if (isHostile || b.isLoiter) {
-                        ctx.beginPath();
-                        ctx.moveTo(cx, cy);
-                        ctx.lineTo(cx + b.x, cy + b.y);
-                        ctx.strokeStyle = color;
-                        ctx.lineWidth = (threat === 2) ? 2 : 1;
-                        ctx.setLineDash([5, 5]);
-                        ctx.stroke();
-                        ctx.setLineDash([]);
-                        
-                        // Draw Drone Shape
+                        if (!isSystemOffline) {
+                            ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + b.x, cy + b.y);
+                            ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]);
+                        }
                         drawDrone(ctx, cx + b.x, cy + b.y, color, b.type);
                         
-                        ctx.font = '10px "Share Tech Mono"';
-                        ctx.fillStyle = color;
-                        ctx.fillText(b.id, cx + b.x + 12, cy + b.y);
-                        if(b.isLoiter) ctx.fillText("[LOITERING]", cx + b.x + 12, cy + b.y + 10);
+                        if (!isSystemOffline) {
+                            ctx.font = '10px "Share Tech Mono"'; ctx.fillStyle = color;
+                            ctx.fillText(b.id, cx + b.x + 12, cy + b.y);
+                        }
                     } else {
-                        ctx.fillStyle = color;
-                        ctx.fillRect(cx + b.x - 2, cy + b.y - 2, 4, 4);
+                        ctx.fillStyle = color; ctx.fillRect(cx + b.x - 2, cy + b.y - 2, 4, 4);
                     }
                 });
 
-                // Player
-                let playerThreat = 0;
-                
-                if (mouseInCanvas) {
-                    playerThreat = getThreatLevel(mx, my);
+                // PLAYER CURSOR
+                if (mouseInCanvas && !isSystemOffline) {
+                    let playerThreat = getThreatLevel(mx, my);
                     if (playerThreat > currentFrameMaxThreat) currentFrameMaxThreat = playerThreat;
-
                     globalThreatLevel = currentFrameMaxThreat;
 
-                    if (playerThreat > 0 && !playerID) {
-                        playerID = "UAS-" + CALLSIGNS[Math.floor(Math.random()*CALLSIGNS.length)];
-                    } else if (playerThreat === 0) {
-                        playerID = null;
-                    }
+                    if (!playerID && playerThreat > 0) playerID = "UAS-TARGET";
+                    
+                    const pColor = (playerThreat === 2) ? '#ff2a2a' : '#ffcc00';
+                    const dx = mx - cx; const dy = my - cy;
+                    const rng = Math.sqrt(dx*dx + dy*dy);
+                    let az = Math.atan2(dy, dx) * (180/Math.PI); az = (az + 90 + 360) % 360;
 
-                    if (playerThreat > 0) {
-                        const pColor = (playerThreat === 2) ? '#ff2a2a' : '#ffcc00';
-                        ctx.beginPath();
-                        ctx.moveTo(cx, cy);
-                        ctx.lineTo(mx, my);
-                        ctx.strokeStyle = pColor;
-                        ctx.lineWidth = (playerThreat === 2) ? 2 : 1;
-                        ctx.stroke();
+                    uiID.innerText = playerID || "--";
+                    uiRng.innerText = rng.toFixed(0) + "m";
+                    uiAz.innerText = az.toFixed(0).padStart(3,0) + "°";
+                    uiX.innerText = dx.toFixed(0); uiY.innerText = (dy*-1).toFixed(0);
 
-                        const dx = mx - cx;
-                        const dy = my - cy;
-                        const rng = Math.sqrt(dx*dx + dy*dy);
-                        let az = Math.atan2(dy, dx) * (180/Math.PI);
-                        az = (az + 90 + 360) % 360;
-                        
-                        uiID.innerText = playerID;
-                        uiRng.innerText = rng.toFixed(0) + "m";
-                        uiAz.innerText = az.toFixed(0).padStart(3,0) + "°";
-                        uiX.innerText = dx.toFixed(0);
-                        uiY.innerText = (dy*-1).toFixed(0);
-
-                        playerTrail.push({x: mx, y: my});
-                        if(playerTrail.length > TRAIL_MAX) playerTrail.shift();
-
-                        if(playerTrail.length > 1) {
-                            ctx.beginPath();
-                            ctx.strokeStyle = pColor;
-                            ctx.lineWidth = 2;
-                            playerTrail.forEach((t, i) => i===0 ? ctx.moveTo(t.x, t.y) : ctx.lineTo(t.x, t.y));
-                            ctx.stroke();
-                        }
-
-                        // Draw Player Shape (Triangle)
-                        ctx.strokeStyle = pColor;
-                        ctx.lineWidth = 2;
-                        ctx.beginPath();
-                        ctx.moveTo(mx, my-8); ctx.lineTo(mx+7, my+8); ctx.lineTo(mx-7, my+8); ctx.closePath();
-                        ctx.stroke();
-
-                        ctx.fillStyle = pColor;
-                        ctx.font = 'bold 12px "Share Tech Mono"';
-                        ctx.fillText(playerID, mx+15, my);
-                    } else {
-                        ctx.fillStyle = '#00ff41';
-                        ctx.fillRect(mx-2, my-2, 4, 4);
-                        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(mx, my);
-                        ctx.strokeStyle = 'rgba(0, 255, 65, 0.2)'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
-                        
-                        if(uiID.innerText !== "--") {
-                            uiID.innerText = "--"; uiRng.innerText = "0m";
-                        }
-                    }
+                    ctx.strokeStyle = pColor; ctx.lineWidth = 2; ctx.beginPath();
+                    ctx.moveTo(mx, my-8); ctx.lineTo(mx+7, my+8); ctx.lineTo(mx-7, my+8); ctx.closePath(); ctx.stroke();
                 } else {
-                    globalThreatLevel = currentFrameMaxThreat;
+                     globalThreatLevel = currentFrameMaxThreat;
                 }
 
-                // UI Text
-                if (globalThreatLevel === 2) {
+                // UI TEXT UPDATES
+                if (isSystemOffline) {
+                    document.documentElement.style.setProperty('--safe', '#ff2a2a'); 
+                    uiStatus.innerText = "SYSTEM OFFLINE";
+                    uiStatus.className = "status-box red-alert";
+                    uiClass.innerText = "NO DATA";
+                    uiClass.className = "t-val alert-text";
+                    uiID.innerText = "--"; uiRng.innerText = "--"; uiAz.innerText = "--";
+                } 
+                else if (globalThreatLevel === 2) {
                     document.documentElement.style.setProperty('--safe', '#ff2a2a');
                     uiStatus.innerText = "CRITICAL BREACH";
                     uiStatus.className = "status-box red-alert";
@@ -1179,18 +1036,6 @@
                     uiStatus.className = "status-box";
                     uiClass.innerText = "ANALYZING";
                     uiClass.className = "t-val";
-                }
-
-                if (globalThreatLevel === 2) {
-                    const flash = Math.sin(Date.now() / 150);
-                    if (flash > 0) {
-                        const gradient = ctx.createRadialGradient(cx, cy, h*0.3, cx, cy, Math.max(w,h)*0.8);
-                        gradient.addColorStop(0, 'rgba(255, 0, 0, 0.0)');
-                        const intensity = 0.2 + (flash * 0.3);
-                        gradient.addColorStop(1, `rgba(255, 0, 0, ${intensity})`);
-                        ctx.fillStyle = gradient;
-                        ctx.fillRect(0, 0, w, h);
-                    }
                 }
 
                 requestAnimationFrame(draw);
